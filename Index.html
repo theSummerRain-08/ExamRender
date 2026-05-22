@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Exam Generator</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 999px;
+      }
+    </style>
+  </head>
+
+  <body class="bg-slate-100 h-screen overflow-hidden">
+    <!-- HEADER -->
+    <header
+      class="h-16 bg-white border-b flex items-center justify-between px-6 shadow-sm"
+    >
+      <div class="flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-lg"
+        >
+          AI
+        </div>
+
+        <div>
+          <h1 class="font-bold text-lg">AI Exam Generator</h1>
+
+          <p class="text-xs text-slate-500">Tạo đề thi tự động bằng AI</p>
+        </div>
+      </div>
+
+      <!-- user -->
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3 bg-slate-100 px-4 py-2 rounded-2xl">
+          <img
+            id="userAvatar"
+            src="https://i.pravatar.cc/100?img=12"
+            alt="Ảnh đại diện"
+            class="w-10 h-10 rounded-full object-cover"
+          />
+
+          <div>
+            <p id="userName" class="font-semibold text-sm">Đang tải...</p>
+
+            <p class="text-xs text-slate-500">Đã kết nối Zalo</p>
+          </div>
+        </div>
+
+        <button
+          id="logoutBtn"
+          class="bg-red-500 hover:bg-red-600 transition text-white px-4 py-2 rounded-xl text-sm font-semibold"
+        >
+          Đăng xuất
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="h-[calc(100vh-64px)] p-4">
+      <div class="grid grid-cols-2 gap-4 h-full">
+        <!-- LEFT -->
+        <section
+          class="bg-white rounded-3xl shadow-sm border flex flex-col overflow-hidden"
+        >
+          <!-- title -->
+          <div class="p-5 border-b">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="font-bold text-lg">Yêu cầu tạo đề</h2>
+
+                <p class="text-sm text-slate-500 mt-1">
+                  Mô tả cấu trúc đề thi bạn muốn tạo
+                </p>
+              </div>
+
+              <div
+                class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-semibold"
+              >
+                AI Prompt
+              </div>
+            </div>
+          </div>
+
+          <!-- messages -->
+          <div class="flex-1 overflow-y-auto p-5 space-y-4">
+            <!-- user -->
+            <div class="flex justify-end">
+              <div
+                class="max-w-[80%] bg-indigo-600 text-white rounded-2xl rounded-br-md px-4 py-3 text-sm leading-relaxed"
+              >
+                Tạo đề Toán lớp 12 gồm:
+                <br /><br />
+
+                - 2 câu đạo hàm
+                <br />
+                - 2 câu tích phân
+                <br />
+                - 5 câu trắc nghiệm xác suất
+                <br />
+                - Có đáp án cuối đề
+                <br />
+                - Thời gian 45 phút
+              </div>
+            </div>
+
+            <!-- ai -->
+            <div class="flex justify-start">
+              <div
+                class="max-w-[80%] bg-slate-100 rounded-2xl rounded-bl-md px-4 py-3 text-sm leading-relaxed"
+              >
+                Đã nhận yêu cầu ✅
+                <br /><br />
+
+                AI đang tạo PDF...
+
+                <div class="mt-4 flex items-center gap-2">
+                  <div
+                    class="w-2 h-2 bg-indigo-500 rounded-full animate-bounce"
+                  ></div>
+                  <div
+                    class="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.15s]"
+                  ></div>
+                  <div
+                    class="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.3s]"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- input -->
+          <div class="border-t p-4">
+            <div class="flex gap-3">
+              <textarea
+                placeholder="Nhập cấu trúc đề thi..."
+                class="flex-1 resize-none rounded-2xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 p-4 h-28 text-sm"
+              ></textarea>
+
+              <button
+                class="w-32 bg-indigo-600 hover:bg-indigo-700 transition text-white rounded-2xl font-semibold"
+              >
+                Tạo đề
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- RIGHT -->
+        <section
+          class="bg-white rounded-3xl shadow-sm border flex flex-col overflow-hidden"
+        >
+          <!-- title -->
+          <div class="p-5 border-b">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="font-bold text-lg">Kết quả AI</h2>
+
+                <p class="text-sm text-slate-500 mt-1">Preview đề thi PDF</p>
+              </div>
+
+              <div
+                class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-semibold"
+              >
+                PDF Ready
+              </div>
+            </div>
+          </div>
+
+          <!-- pdf -->
+          <div class="flex-1 bg-slate-200 p-6 overflow-auto">
+            <div
+              class="bg-white w-full max-w-3xl mx-auto min-h-full rounded-2xl shadow-lg p-10"
+            >
+              <div class="text-center border-b pb-5">
+                <h1 class="font-bold text-2xl">ĐỀ KIỂM TRA TOÁN 12</h1>
+
+                <p class="text-slate-500 mt-2">Thời gian làm bài: 45 phút</p>
+              </div>
+
+              <div class="mt-8 space-y-6 text-[15px] leading-relaxed">
+                <div>
+                  <h3 class="font-semibold mb-2">Câu 1</h3>
+
+                  <p>Tính đạo hàm của: y = x³ - 2x + 1</p>
+                </div>
+
+                <div>
+                  <h3 class="font-semibold mb-2">Câu 2</h3>
+
+                  <p>Tính tích phân: ∫(2x + 1)dx</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- actions -->
+          <div class="border-t p-4 flex items-center justify-between">
+            <div class="text-sm text-slate-500">exam_math_12.pdf</div>
+
+            <div class="flex gap-3">
+              <button
+                class="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 transition text-sm font-medium"
+              >
+                Xem toàn màn hình
+              </button>
+
+              <button
+                class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 transition text-white text-sm font-semibold"
+              >
+                Tải PDF
+              </button>
+
+              <button
+                class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 transition text-white text-sm font-semibold"
+              >
+                Gửi qua Zalo
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      const logoutBtn = document.getElementById("logoutBtn");
+      const userName = document.getElementById("userName");
+      const userAvatar = document.getElementById("userAvatar");
+
+      async function loadCurrentUser() {
+        const response = await fetch("/api/me");
+
+        if (response.status === 401) {
+          window.location.href = "login.html";
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error("Không tải được thông tin người dùng");
+        }
+
+        const { user } = await response.json();
+        userName.textContent = user.name;
+
+        if (user.picture) {
+          userAvatar.src = user.picture;
+        }
+      }
+
+      loadCurrentUser().catch(() => {
+        window.location.href = "login.html";
+      });
+
+      logoutBtn.addEventListener("click", async () => {
+        await fetch("/api/logout");
+        window.location.href = "login.html";
+      });
+    </script>
+  </body>
+</html>
