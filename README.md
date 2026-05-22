@@ -38,6 +38,12 @@ If you set it manually, use:
 BASE_URL=https://examrender-136u.onrender.com
 ```
 
+Do not use placeholder values such as:
+
+```env
+BASE_URL=https://ten-app-cua-ban.onrender.com
+```
+
 ## Zalo Developers
 
 Set app domain:
