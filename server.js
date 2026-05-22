@@ -18,7 +18,7 @@ if (fs.existsSync(envPath)) {
 const PORT = Number(process.env.PORT || 3000);
 const APP_ID = process.env.ZALO_APP_ID;
 const APP_SECRET = process.env.ZALO_APP_SECRET;
-const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
+const BASE_URL = process.env.BASE_URL || process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
 const REDIRECT_URI = `${BASE_URL}/api/auth/zalo/callback`;
 
 const sessions = new Map();
