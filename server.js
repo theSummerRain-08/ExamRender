@@ -111,7 +111,7 @@ async function fetchZaloProfile(accessToken) {
 
 function serveStatic(req, res) {
   const requestedPath = new URL(req.url, BASE_URL).pathname;
-  const fileName = requestedPath === "/" ? "Index.html" : requestedPath.slice(1);
+  const fileName = requestedPath === "/" ? "index.html" : requestedPath.slice(1);
   const filePath = path.resolve(__dirname, fileName);
 
   if (!filePath.startsWith(__dirname)) {
@@ -181,7 +181,7 @@ const server = http.createServer(async (req, res) => {
       session.user = await fetchZaloProfile(token.access_token);
       delete session.oauth;
 
-      redirect(res, "/Index.html");
+      redirect(res, "/index.html");
       return;
     }
 
