@@ -1,0 +1,94 @@
+<svg width="100%" viewBox="0 0 680 260" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>AI Exam Generator logo</title>
+<desc>Logo tờ đề thi với huy hiệu AI nằm bên trong</desc>
+
+<style>
+  .shadow{fill:#dde0f7}
+  .paper{fill:#ffffff;stroke:#dde0f7;stroke-width:2}
+  .fold-dark{fill:#c7d2fe}
+  .fold-light{fill:#e0e7ff}
+  .hbar{fill:#4f46e5}
+  .seal{fill:#3730a3}
+  .seal2{fill:#818cf8}
+  .seal3{fill:#c7d2fe}
+  .q{fill:#6366f1}
+  .line-a{fill:#334155}
+  .line-b{fill:#cbd5e1}
+  .line-c{fill:#e2e8f0}
+  .ch-blank{fill:#eef2ff}
+  .ch-correct{fill:#059669}
+  .ch-wrong{fill:#f1f5f9}
+  .ai-ring{fill:#eef2ff}
+  .ai-ring2{fill:#e0e7ff}
+  .ai-circle{fill:#4f46e5}
+  .ai-text{font-family:system-ui,sans-serif;font-size:58px;font-weight:800;fill:#fff;letter-spacing:-1px}
+  .spark-y{fill:#fbbf24}
+  .spark-v{fill:#818cf8}
+  .spark-g{fill:#34d399}
+</style>
+
+<!-- Shadow -->
+<rect x="214" y="28" width="210" height="224" rx="14" class="shadow"/>
+
+<!-- Paper -->
+<rect x="204" y="18" width="210" height="224" rx="14" class="paper"/>
+
+<!-- Folded corner -->
+<polygon points="374,18 414,18 414,58" class="fold-dark"/>
+<polygon points="374,18 414,58 374,58" class="fold-light"/>
+
+<!-- Header bar -->
+<rect x="204" y="18" width="210" height="40" rx="14" class="hbar"/>
+<rect x="204" y="42" width="210" height="16" class="hbar"/>
+<circle cx="226" cy="38" r="13" class="seal"/>
+<circle cx="226" cy="38" r="9"  class="seal2"/>
+<circle cx="226" cy="38" r="5"  class="seal3"/>
+<rect x="246" y="27" width="96" height="8" rx="4" fill="#c7d2fe"/>
+<rect x="246" y="40" width="66" height="6" rx="3" fill="#a5b4fc"/>
+
+<!-- Row 1 -->
+<rect x="218" y="70" width="11" height="11" rx="3" class="q"/>
+<rect x="234" y="71" width="88" height="6"  rx="3" class="line-a"/>
+<rect x="234" y="82" width="64" height="5"  rx="2.5" class="line-b"/>
+
+<!-- Row 2 -->
+<rect x="218" y="98" width="11" height="11" rx="3" class="q"/>
+<rect x="234" y="99" width="100" height="6" rx="3" class="line-a"/>
+<rect x="234" y="110" width="74" height="5" rx="2.5" class="line-b"/>
+
+<!-- Row 3 — choices -->
+<rect x="218" y="126" width="11" height="11" rx="3" class="q"/>
+<rect x="234" y="127" width="80" height="6"  rx="3" class="line-a"/>
+<circle cx="242" cy="148" r="9" class="ch-blank"/>
+<circle cx="264" cy="148" r="9" class="ch-blank"/>
+<circle cx="286" cy="148" r="9" class="ch-correct"/>
+<circle cx="286" cy="148" r="4" fill="#ffffff" opacity=".5"/>
+<circle cx="308" cy="148" r="9" class="ch-wrong"/>
+
+<!-- Row 4 -->
+<rect x="218" y="162" width="11" height="11" rx="3" class="q"/>
+<rect x="234" y="163" width="92" height="6"  rx="3" class="line-a"/>
+<rect x="234" y="174" width="70" height="5"  rx="2.5" class="line-b"/>
+<rect x="234" y="183" width="50" height="5"  rx="2.5" class="line-c"/>
+
+<!-- Divider -->
+<rect x="218" y="197" width="140" height="1.5" fill="#f1f5f9"/>
+<rect x="218" y="203" width="52" height="12" rx="6" fill="#059669" opacity=".3"/>
+<rect x="278" y="203" width="36" height="12" rx="6" fill="#4f46e5" opacity=".2"/>
+
+<!-- AI badge inside paper -->
+<circle cx="372" cy="186" r="64" class="ai-ring"  opacity=".7"/>
+<circle cx="372" cy="186" r="52" class="ai-ring2" opacity=".9"/>
+<circle cx="372" cy="186" r="42" class="ai-circle"/>
+<text x="372" y="208" text-anchor="middle" class="ai-text">AI</text>
+
+<!-- Sparkles -->
+<path d="M178 58  L181 69 L192 72 L181 75 L178 86  L175 75 L164 72 L175 69 Z" class="spark-y"/>
+<path d="M444 34  L447 43 L456 46 L447 49 L444 58  L441 49 L432 46 L441 43 Z" class="spark-v"/>
+<path d="M446 218 L448 225 L455 227 L448 229 L446 236 L444 229 L437 227 L444 225 Z" class="spark-y"/>
+<path d="M166 190 L168 196 L174 198 L168 200 L166 206 L164 200 L158 198 L164 196 Z" class="spark-g"/>
+<circle cx="192" cy="94" r="5" fill="#c7d2fe"/>
+<circle cx="203" cy="88" r="3" fill="#ddd6fe"/>
+<circle cx="443" cy="130" r="4" fill="#fde68a"/>
+<circle cx="453" cy="123" r="3" fill="#fef3c7"/>
+</svg>

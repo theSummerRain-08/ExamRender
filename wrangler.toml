@@ -12,3 +12,7 @@ pages_build_output_dir = "."
 [[kv_namespaces]]
 binding = "SESSIONS"
 id = "a9dcd828589f4027a10d455a21c1622e"
+
+# ── Cloudflare Workers AI (tạo đề thi) ──────────────────────────────────────
+[ai]
+binding = "AI"

@@ -3,266 +3,385 @@
   <head>
     <meta name="zalo-platform-site-verification" content="Se2y9O-eQNDvf_beex18Vbk6ubsty3S5EJam" />
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>AI Exam Generator</title>
-
     <script src="https://cdn.tailwindcss.com"></script>
-
     <style>
-      ::-webkit-scrollbar {
-        width: 6px;
-      }
+      ::-webkit-scrollbar { width: 4px; }
+      ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
 
-      ::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 999px;
+      html, body { height: 100%; overflow: hidden; }
+      .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+      .nav-bar  { padding-bottom: env(safe-area-inset-bottom); }
+
+      /* ── Exam document styles ── */
+      .exam-doc { font-family: 'Times New Roman', serif; font-size: 14px; line-height: 1.8; color: #1e293b; }
+      .exam-header { text-align: center; border-bottom: 2px solid #1e293b; padding-bottom: 12px; margin-bottom: 16px; }
+      .exam-header .school { font-size: 12px; font-weight: 600; text-transform: uppercase; margin: 0; }
+      .exam-header .exam-title { font-size: 17px; font-weight: 700; text-transform: uppercase; margin: 6px 0 4px; }
+      .exam-header .exam-meta { font-size: 12px; color: #475569; margin: 0; }
+      .section-title { font-size: 14px; font-weight: 700; text-transform: uppercase; margin: 18px 0 10px; border-left: 4px solid #4f46e5; padding-left: 8px; color: #312e81; }
+      .question { margin-bottom: 14px; }
+      .q-text { margin: 0 0 6px; }
+      .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; padding-left: 12px; }
+      .choice { font-size: 13px; }
+      .answer-key { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 16px; margin-top: 20px; }
+      .answer-key p { margin: 4px 0; font-size: 13px; }
+
+      /* ── Print styles ── */
+      @media print {
+        header, nav, #actionBar { display: none !important; }
+        body { background: white !important; overflow: visible !important; height: auto !important; }
+        main { overflow: visible !important; height: auto !important; }
+        #tabResult { display: flex !important; height: auto !important; overflow: visible !important; }
+        #tabCreate { display: none !important; }
+        #pdfPreview { box-shadow: none !important; border: none !important; border-radius: 0 !important; padding: 0 !important; }
+        html, body { margin: 0; padding: 0; }
+        @page { margin: 1.5cm 2cm; }
       }
     </style>
   </head>
 
-  <body class="bg-slate-100 h-screen overflow-hidden">
-    <!-- HEADER -->
-    <header
-      class="h-16 bg-white border-b flex items-center justify-between px-6 shadow-sm"
-    >
-      <div class="flex items-center gap-3">
-        <div
-          class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-lg"
-        >
-          AI
-        </div>
+  <body class="bg-slate-100 flex flex-col h-full">
 
-        <div>
-          <h1 class="font-bold text-lg">AI Exam Generator</h1>
-
-          <p class="text-xs text-slate-500">Tạo đề thi tự động bằng AI</p>
+    <!-- ══ HEADER ══════════════════════════════════════════════════════════ -->
+    <header class="bg-white border-b px-4 py-3 flex items-center justify-between shadow-sm flex-shrink-0">
+      <div class="flex items-center gap-2">
+        <img src="/Image/graident-ai.avif" alt="AI" class="w-9 h-9 rounded-xl object-cover shadow" />
+        <div class="leading-tight">
+          <p class="font-bold text-sm text-slate-800">AI Exam Generator</p>
+          <p class="text-xs text-slate-400">Tạo đề thi tự động</p>
         </div>
       </div>
 
-      <!-- user -->
-      <div class="flex items-center gap-4">
-        <div class="flex items-center gap-3 bg-slate-100 px-4 py-2 rounded-2xl">
-          <img
-            id="userAvatar"
-            src="https://i.pravatar.cc/100?img=12"
-            alt="Ảnh đại diện"
-            class="w-10 h-10 rounded-full object-cover"
-          />
-
-          <div>
-            <p id="userName" class="font-semibold text-sm">Đang tải...</p>
-
-            <p class="text-xs text-slate-500">Đã kết nối Zalo</p>
-          </div>
+      <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-full border">
+          <img id="userAvatar" src="https://i.pravatar.cc/100?img=12" alt="Avatar"
+               class="w-7 h-7 rounded-full object-cover" />
+          <p id="userName" class="text-xs font-semibold text-slate-700 max-w-[90px] truncate">Đang tải...</p>
         </div>
-
-        <button
-          id="logoutBtn"
-          class="bg-red-500 hover:bg-red-600 transition text-white px-4 py-2 rounded-xl text-sm font-semibold"
-        >
+        <button id="logoutBtn"
+                class="text-xs text-red-500 font-semibold px-3 py-2 rounded-xl border border-red-200 active:bg-red-50 transition">
           Đăng xuất
         </button>
       </div>
     </header>
 
-    <!-- MAIN -->
-    <main class="h-[calc(100vh-64px)] p-4">
-      <div class="grid grid-cols-2 gap-4 h-full">
-        <!-- LEFT -->
-        <section
-          class="bg-white rounded-3xl shadow-sm border flex flex-col overflow-hidden"
-        >
-          <!-- title -->
-          <div class="p-5 border-b">
-            <div class="flex items-center justify-between">
-              <div>
-                <h2 class="font-bold text-lg">Yêu cầu tạo đề</h2>
+    <!-- ══ MAIN (thay đổi theo tab) ════════════════════════════════════════ -->
+    <main class="flex-1 overflow-hidden flex flex-col">
 
-                <p class="text-sm text-slate-500 mt-1">
-                  Mô tả cấu trúc đề thi bạn muốn tạo
-                </p>
-              </div>
+      <!-- ── TAB 1: TẠO ĐỀ ──────────────────────────────────────────────── -->
+      <div id="tabCreate" class="flex-1 flex flex-col overflow-hidden">
 
-              <div
-                class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-semibold"
-              >
-                AI Prompt
-              </div>
+        <!-- Danh sách tin nhắn -->
+        <div id="messages" class="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+
+          <!-- Tin nhắn chào AI -->
+          <div class="flex gap-2 items-end">
+            <img src="/Image/graident-ai.avif" alt="AI" class="w-8 h-8 rounded-xl object-cover flex-shrink-0" />
+            <div class="bg-white rounded-2xl rounded-bl-md px-4 py-3 text-sm shadow-sm border max-w-[85%] leading-relaxed">
+              Xin chào thầy/cô! 👋<br /><br />
+              Hãy mô tả đề thi cần tạo. Ví dụ:<br />
+              <em class="text-indigo-600 not-italic">"Toán 12: 5 câu trắc nghiệm xác suất, 2 câu tích phân, có đáp án, 45 phút"</em>
             </div>
           </div>
 
-          <!-- messages -->
-          <div class="flex-1 overflow-y-auto p-5 space-y-4">
-            <!-- user -->
-            <div class="flex justify-end">
-              <div
-                class="max-w-[80%] bg-indigo-600 text-white rounded-2xl rounded-br-md px-4 py-3 text-sm leading-relaxed"
-              >
-                Tạo đề Toán lớp 12 gồm:
-                <br /><br />
+        </div>
 
-                - 2 câu đạo hàm
-                <br />
-                - 2 câu tích phân
-                <br />
-                - 5 câu trắc nghiệm xác suất
-                <br />
-                - Có đáp án cuối đề
-                <br />
-                - Thời gian 45 phút
-              </div>
-            </div>
-
-            <!-- ai -->
-            <div class="flex justify-start">
-              <div
-                class="max-w-[80%] bg-slate-100 rounded-2xl rounded-bl-md px-4 py-3 text-sm leading-relaxed"
-              >
-                Đã nhận yêu cầu ✅
-                <br /><br />
-
-                AI đang tạo PDF...
-
-                <div class="mt-4 flex items-center gap-2">
-                  <div
-                    class="w-2 h-2 bg-indigo-500 rounded-full animate-bounce"
-                  ></div>
-                  <div
-                    class="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.15s]"
-                  ></div>
-                  <div
-                    class="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.3s]"
-                  ></div>
-                </div>
-              </div>
-            </div>
+        <!-- Ô nhập liệu — luôn ghim cuối màn hình -->
+        <div class="bg-white border-t px-3 py-3 pb-safe flex-shrink-0 shadow-[0_-2px_8px_rgba(0,0,0,0.06)]">
+          <div class="flex gap-2 items-end">
+            <textarea
+              id="promptInput"
+              placeholder="Nhập yêu cầu đề thi của thầy/cô..."
+              rows="3"
+              class="flex-1 resize-none rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 px-4 py-3 text-sm leading-relaxed bg-slate-50"
+            ></textarea>
+            <button
+              id="generateBtn"
+              class="w-14 h-14 bg-indigo-600 active:bg-indigo-800 text-white rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md transition-transform active:scale-95">
+              <svg id="sendIcon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
+                   stroke="currentColor" stroke-width="2.2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+              </svg>
+              <svg id="loadingIcon" class="hidden animate-spin" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" stroke="white" stroke-width="3" opacity=".3"/>
+                <path d="M12 2a10 10 0 0 1 10 10" stroke="white" stroke-width="3" stroke-linecap="round"/>
+              </svg>
+            </button>
           </div>
+        </div>
 
-          <!-- input -->
-          <div class="border-t p-4">
-            <div class="flex gap-3">
-              <textarea
-                placeholder="Nhập cấu trúc đề thi..."
-                class="flex-1 resize-none rounded-2xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 p-4 h-28 text-sm"
-              ></textarea>
-
-              <button
-                class="w-32 bg-indigo-600 hover:bg-indigo-700 transition text-white rounded-2xl font-semibold"
-              >
-                Tạo đề
-              </button>
-            </div>
-          </div>
-        </section>
-
-        <!-- RIGHT -->
-        <section
-          class="bg-white rounded-3xl shadow-sm border flex flex-col overflow-hidden"
-        >
-          <!-- title -->
-          <div class="p-5 border-b">
-            <div class="flex items-center justify-between">
-              <div>
-                <h2 class="font-bold text-lg">Kết quả AI</h2>
-
-                <p class="text-sm text-slate-500 mt-1">Preview đề thi PDF</p>
-              </div>
-
-              <div
-                class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-semibold"
-              >
-                PDF Ready
-              </div>
-            </div>
-          </div>
-
-          <!-- pdf -->
-          <div class="flex-1 bg-slate-200 p-6 overflow-auto">
-            <div
-              class="bg-white w-full max-w-3xl mx-auto min-h-full rounded-2xl shadow-lg p-10"
-            >
-              <div class="text-center border-b pb-5">
-                <h1 class="font-bold text-2xl">ĐỀ KIỂM TRA TOÁN 12</h1>
-
-                <p class="text-slate-500 mt-2">Thời gian làm bài: 45 phút</p>
-              </div>
-
-              <div class="mt-8 space-y-6 text-[15px] leading-relaxed">
-                <div>
-                  <h3 class="font-semibold mb-2">Câu 1</h3>
-
-                  <p>Tính đạo hàm của: y = x³ - 2x + 1</p>
-                </div>
-
-                <div>
-                  <h3 class="font-semibold mb-2">Câu 2</h3>
-
-                  <p>Tính tích phân: ∫(2x + 1)dx</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- actions -->
-          <div class="border-t p-4 flex items-center justify-between">
-            <div class="text-sm text-slate-500">exam_math_12.pdf</div>
-
-            <div class="flex gap-3">
-              <button
-                class="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 transition text-sm font-medium"
-              >
-                Xem toàn màn hình
-              </button>
-
-              <button
-                class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 transition text-white text-sm font-semibold"
-              >
-                Tải PDF
-              </button>
-
-              <button
-                class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 transition text-white text-sm font-semibold"
-              >
-                Gửi qua Zalo
-              </button>
-            </div>
-          </div>
-        </section>
       </div>
+
+      <!-- ── TAB 2: KẾT QUẢ ─────────────────────────────────────────────── -->
+      <div id="tabResult" class="flex-1 flex flex-col overflow-hidden hidden">
+
+        <!-- Preview PDF -->
+        <div class="flex-1 overflow-y-auto p-4">
+          <div id="pdfPreview" class="bg-white rounded-2xl shadow-sm border p-6 min-h-[60vh]">
+            <div class="flex flex-col items-center justify-center py-16 text-center">
+              <div class="text-5xl mb-4">📄</div>
+              <p class="font-semibold text-slate-500">Chưa có đề thi nào</p>
+              <p class="text-sm text-slate-400 mt-1 max-w-xs">
+                Nhập yêu cầu ở tab "Tạo đề" để xem kết quả ở đây
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nút thao tác -->
+        <div id="actionBar" class="bg-white border-t px-4 py-3 pb-safe flex-shrink-0 shadow-[0_-2px_8px_rgba(0,0,0,0.06)]">
+          <div class="grid grid-cols-3 gap-2">
+            <button id="btnFullscreen"
+              class="py-3 rounded-xl border border-slate-300 text-xs font-semibold text-slate-600 active:bg-slate-50 transition flex flex-col items-center gap-1">
+              <span class="text-lg">🔍</span>Xem toàn màn
+            </button>
+            <button id="btnPdf"
+              class="py-3 rounded-xl bg-emerald-600 active:bg-emerald-700 text-white text-xs font-bold transition flex flex-col items-center gap-1">
+              <span class="text-lg">⬇️</span>Tải PDF
+            </button>
+            <button id="btnZalo"
+              class="py-3 rounded-xl bg-blue-600 active:bg-blue-700 text-white text-xs font-bold transition flex flex-col items-center gap-1">
+              <span class="text-lg">💬</span>Gửi Zalo
+            </button>
+          </div>
+          <p id="shareMsg" class="hidden text-center text-xs text-slate-500 mt-2"></p>
+        </div>
+
+      </div>
+
     </main>
 
+    <!-- ══ BOTTOM TAB BAR ══════════════════════════════════════════════════ -->
+    <nav class="nav-bar bg-white border-t flex flex-shrink-0">
+
+      <button id="btnTabCreate" onclick="switchTab('create')"
+              class="flex-1 flex flex-col items-center justify-center py-3 gap-1 text-indigo-600 border-t-2 border-indigo-600 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
+             stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+        </svg>
+        <span class="text-xs font-bold">Tạo đề</span>
+      </button>
+
+      <button id="btnTabResult" onclick="switchTab('result')"
+              class="flex-1 flex flex-col items-center justify-center py-3 gap-1 text-slate-400 border-t-2 border-transparent transition">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
+             stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        <span class="text-xs font-medium">Kết quả</span>
+      </button>
+
+    </nav>
+
+    <!-- ══ SCRIPTS ══════════════════════════════════════════════════════════ -->
     <script>
-      const logoutBtn = document.getElementById("logoutBtn");
-      const userName = document.getElementById("userName");
+      // ── Auth ────────────────────────────────────────────────────────────
+      const userName   = document.getElementById("userName");
       const userAvatar = document.getElementById("userAvatar");
+      const logoutBtn  = document.getElementById("logoutBtn");
 
-      async function loadCurrentUser() {
-        const response = await fetch("/api/me");
-
-        if (response.status === 401) {
-          window.location.href = "login.html";
-          return;
-        }
-
-        if (!response.ok) {
-          throw new Error("Không tải được thông tin người dùng");
-        }
-
-        const { user } = await response.json();
+      async function loadUser() {
+        const res = await fetch("/api/me");
+        if (res.status === 401) { window.location.href = "login.html"; return; }
+        const { user } = await res.json();
         userName.textContent = user.name;
-
-        if (user.picture) {
-          userAvatar.src = user.picture;
-        }
+        if (user.picture) userAvatar.src = user.picture;
       }
-
-      loadCurrentUser().catch(() => {
-        window.location.href = "login.html";
-      });
+      loadUser().catch(() => { window.location.href = "login.html"; });
 
       logoutBtn.addEventListener("click", async () => {
         await fetch("/api/logout");
         window.location.href = "login.html";
+      });
+
+      // ── Tab switching ────────────────────────────────────────────────────
+      function switchTab(tab) {
+        const isCreate = tab === "create";
+
+        document.getElementById("tabCreate").classList.toggle("hidden", !isCreate);
+        document.getElementById("tabResult").classList.toggle("hidden", isCreate);
+
+        const activeClass   = "text-indigo-600 border-t-2 border-indigo-600";
+        const inactiveClass = "text-slate-400 border-t-2 border-transparent";
+
+        document.getElementById("btnTabCreate").className =
+          `flex-1 flex flex-col items-center justify-center py-3 gap-1 transition ${isCreate ? activeClass : inactiveClass}`;
+        document.getElementById("btnTabResult").className =
+          `flex-1 flex flex-col items-center justify-center py-3 gap-1 transition ${!isCreate ? activeClass : inactiveClass}`;
+      }
+
+      // ── Gửi tin nhắn ────────────────────────────────────────────────────
+      const messages    = document.getElementById("messages");
+      const promptInput = document.getElementById("promptInput");
+      const generateBtn = document.getElementById("generateBtn");
+
+      function addMessage(html, isUser = false) {
+        const wrapper = document.createElement("div");
+        wrapper.className = isUser ? "flex justify-end" : "flex gap-2 items-end";
+
+        if (isUser) {
+          wrapper.innerHTML = `
+            <div class="bg-indigo-600 text-white rounded-2xl rounded-tr-md px-4 py-3 text-sm max-w-[85%] leading-relaxed shadow-sm">
+              ${html}
+            </div>`;
+        } else {
+          wrapper.innerHTML = `
+            <img src="/Image/graident-ai.avif" alt="AI" class="w-8 h-8 rounded-xl object-cover flex-shrink-0" />
+            <div class="bg-white rounded-2xl rounded-bl-md px-4 py-3 text-sm shadow-sm border max-w-[85%] leading-relaxed">
+              ${html}
+            </div>`;
+        }
+
+        messages.appendChild(wrapper);
+        messages.scrollTop = messages.scrollHeight;
+        return wrapper;
+      }
+
+      const sendIcon    = document.getElementById("sendIcon");
+      const loadingIcon = document.getElementById("loadingIcon");
+      const pdfPreview  = document.getElementById("pdfPreview");
+
+      // ── Lưu trữ đề thi hiện tại ─────────────────────────────────────────
+      let currentExamHtml  = null;
+      let currentExamTitle = null;
+      let currentShareId   = null;   // UUID khi đã lưu lên KV
+      let isSaving         = false;
+
+      // ── Lưu đề lên KV, trả về share URL ──────────────────────────────────
+      async function saveExam() {
+        if (currentShareId) return `/exam-view.html?id=${currentShareId}`;
+        if (isSaving) return null;
+        isSaving = true;
+
+        const res = await fetch("/api/exam/save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ html: currentExamHtml, title: currentExamTitle }),
+        });
+        isSaving = false;
+
+        if (!res.ok) return null;
+        const { id } = await res.json();
+        currentShareId = id;
+        return `/exam-view.html?id=${id}`;
+      }
+
+      // ── Nút Xem toàn màn hình ────────────────────────────────────────────
+      document.getElementById("btnFullscreen").addEventListener("click", async () => {
+        if (!currentExamHtml) return;
+        const path = await saveExam();
+        if (path) window.open(path, "_blank");
+      });
+
+      // ── Nút Tải PDF ──────────────────────────────────────────────────────
+      document.getElementById("btnPdf").addEventListener("click", () => {
+        if (!currentExamHtml) return;
+        window.print();
+      });
+
+      // ── Nút Gửi Zalo ─────────────────────────────────────────────────────
+      const btnZalo  = document.getElementById("btnZalo");
+      const shareMsg = document.getElementById("shareMsg");
+
+      btnZalo.addEventListener("click", async () => {
+        if (!currentExamHtml) return;
+
+        const originalText = btnZalo.innerHTML;
+        btnZalo.innerHTML = `<span class="text-lg">⏳</span>Đang lưu...`;
+        btnZalo.disabled = true;
+
+        const path = await saveExam();
+        btnZalo.innerHTML = originalText;
+        btnZalo.disabled = false;
+
+        if (!path) {
+          shareMsg.textContent = "❌ Không thể tạo link. Vui lòng thử lại.";
+          shareMsg.classList.remove("hidden");
+          return;
+        }
+
+        const fullUrl = encodeURIComponent(location.origin + path);
+        const shareText = encodeURIComponent(`📄 ${currentExamTitle || "Đề thi"} — xem tại: ${location.origin + path}`);
+
+        // Mở Zalo share URL
+        const zaloShareUrl = `https://zalo.me/share/url?url=${fullUrl}&title=${shareText}`;
+        window.open(zaloShareUrl, "_blank");
+
+        // Hiện link dự phòng
+        shareMsg.innerHTML = `🔗 Link đề: <a href="${path}" target="_blank" class="text-indigo-600 underline font-medium">Mở link</a>`;
+        shareMsg.classList.remove("hidden");
+      });
+
+      function setLoading(on) {
+        generateBtn.disabled = on;
+        sendIcon.classList.toggle("hidden", on);
+        loadingIcon.classList.toggle("hidden", !on);
+      }
+
+      generateBtn.addEventListener("click", async () => {
+        const text = promptInput.value.trim();
+        if (!text || generateBtn.disabled) return;
+
+        addMessage(text.replace(/\n/g, "<br/>"), true);
+        promptInput.value = "";
+        setLoading(true);
+
+        // Tin nhắn loading
+        const aiMsgWrapper = addMessage(`
+          Đang tạo đề thi... ✦
+          <span class="inline-flex gap-1 ml-1">
+            <span class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce inline-block"></span>
+            <span class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce inline-block [animation-delay:0.15s]"></span>
+            <span class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce inline-block [animation-delay:0.3s]"></span>
+          </span>
+        `);
+        const aiMsgBubble = aiMsgWrapper.querySelector("div:last-child");
+
+        try {
+          const res = await fetch("/api/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt: text }),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok || data.error) {
+            aiMsgBubble.innerHTML = `<span class="text-red-500">❌ Lỗi: ${data.error || "Không thể tạo đề thi"}</span>`;
+          } else {
+            // Lưu đề thi vào biến toàn cục
+            currentExamHtml  = data.html;
+            currentExamTitle = text.length > 40 ? text.slice(0, 40) + "..." : text;
+            currentShareId   = null; // reset link cũ
+            shareMsg.classList.add("hidden");
+
+            // Cập nhật tin nhắn chat
+            aiMsgBubble.innerHTML = `✅ Đề thi đã được tạo! <button onclick="switchTab('result')" class="ml-2 text-indigo-600 font-semibold underline">Xem kết quả →</button>`;
+
+            // Hiển thị đề thi trong tab Kết quả
+            pdfPreview.innerHTML = data.html;
+
+            // Tự động chuyển tab
+            switchTab("result");
+          }
+        } catch (err) {
+          aiMsgBubble.innerHTML = `<span class="text-red-500">❌ Lỗi kết nối: ${err.message}</span>`;
+        } finally {
+          setLoading(false);
+        }
+      });
+
+      // Enter gửi, Shift+Enter xuống dòng
+      promptInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          generateBtn.click();
+        }
       });
     </script>
   </body>

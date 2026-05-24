@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Xem đề thi - AI Exam Generator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* ── Exam document styles ── */
+    .exam-doc { font-family: "Times New Roman", serif; font-size: 14px; line-height: 1.7; color: #111; }
+    .exam-header { text-align: center; margin-bottom: 1rem; }
+    .exam-header .school { font-weight: bold; font-size: 13px; text-transform: uppercase; margin: 0; }
+    .exam-header .exam-title { font-size: 18px; font-weight: bold; margin: 6px 0 4px; text-transform: uppercase; }
+    .exam-header .exam-meta { font-size: 13px; color: #444; margin: 0; }
+    .section-title { font-weight: bold; font-size: 14px; text-transform: uppercase; margin: 1.2rem 0 0.5rem; border-bottom: 1px solid #ccc; padding-bottom: 3px; }
+    .question { margin-bottom: 1rem; }
+    .q-text { margin: 0 0 6px; }
+    .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; padding-left: 1rem; }
+    .choice { font-size: 14px; }
+    .answer-key { margin-top: 1.5rem; padding-top: 0.75rem; border-top: 2px solid #333; }
+    .answer-key p { margin: 0; line-height: 2; }
+
+    /* ── Print styles ── */
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white !important; padding: 0 !important; }
+      #examContent { box-shadow: none !important; border: none !important; padding: 0 !important; margin: 0 !important; max-width: 100% !important; }
+      html, body { margin: 0; padding: 0; }
+      @page { margin: 1.5cm 2cm; }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- Top bar -->
+  <div class="no-print sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shadow-sm">
+    <div class="flex items-center gap-2">
+      <img src="/logo.svg" alt="Logo" class="w-8 h-8" />
+      <span class="font-semibold text-gray-800 text-sm" id="examTitle">Đề thi</span>
+    </div>
+    <div class="flex gap-2">
+      <button
+        onclick="window.print()"
+        class="flex items-center gap-1.5 bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-xl shadow active:scale-95 transition-transform">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+        </svg>
+        Tải PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading state -->
+  <div id="loadingState" class="flex flex-col items-center justify-center py-24 gap-4">
+    <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+    <p class="text-gray-500 text-sm">Đang tải đề thi...</p>
+  </div>
+
+  <!-- Error state -->
+  <div id="errorState" class="hidden flex flex-col items-center justify-center py-24 gap-4 px-6">
+    <div class="text-5xl">📭</div>
+    <p class="text-gray-700 font-semibold text-center" id="errorMsg">Không tìm thấy đề thi</p>
+    <p class="text-gray-400 text-sm text-center">Link có thể đã hết hạn (7 ngày) hoặc không tồn tại.</p>
+    <a href="/login.html" class="mt-2 text-indigo-600 text-sm font-medium underline">← Về trang chủ</a>
+  </div>
+
+  <!-- Exam content -->
+  <div id="examContent" class="hidden max-w-2xl mx-auto my-6 bg-white rounded-2xl shadow p-6 px-5">
+    <div id="examBody"></div>
+  </div>
+
+  <!-- Author / meta footer -->
+  <div id="examMeta" class="no-print hidden text-center pb-8 text-xs text-gray-400 mt-2">
+    <p id="metaText"></p>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const id = params.get("id");
+
+    if (!id) {
+      showError("Link đề thi không hợp lệ.");
+    } else {
+      loadExam(id);
+    }
+
+    async function loadExam(id) {
+      try {
+        const res = await fetch(`/api/exam/${id}`);
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          showError(err.error || "Không tìm thấy đề thi.");
+          return;
+        }
+        const exam = await res.json();
+        renderExam(exam);
+      } catch (e) {
+        showError("Lỗi kết nối. Vui lòng thử lại.");
+      }
+    }
+
+    function renderExam(exam) {
+      document.getElementById("loadingState").classList.add("hidden");
+
+      // Update title
+      document.title = (exam.title || "Đề thi") + " - AI Exam Generator";
+      document.getElementById("examTitle").textContent = exam.title || "Đề thi";
+
+      // Render HTML
+      document.getElementById("examBody").innerHTML = exam.html || "";
+      document.getElementById("examContent").classList.remove("hidden");
+
+      // Meta
+      if (exam.author || exam.createdAt) {
+        const date = exam.createdAt ? new Date(exam.createdAt).toLocaleDateString("vi-VN") : "";
+        document.getElementById("metaText").textContent =
+          `Tạo bởi ${exam.author || "Giáo viên"} · ${date}`;
+        document.getElementById("examMeta").classList.remove("hidden");
+      }
+    }
+
+    function showError(msg) {
+      document.getElementById("loadingState").classList.add("hidden");
+      document.getElementById("errorMsg").textContent = msg;
+      document.getElementById("errorState").classList.remove("hidden");
+    }
+  </script>
+</body>
+</html>

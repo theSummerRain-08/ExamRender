@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đang đăng nhập...</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center">
+
+  <div class="bg-white rounded-3xl shadow-xl p-10 w-full max-w-sm text-center">
+
+    <div id="loading">
+      <div class="w-16 h-16 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-2xl font-bold mx-auto">AI</div>
+      <h2 class="mt-6 text-xl font-bold text-slate-800">Đang xác thực Zalo...</h2>
+      <p class="mt-2 text-slate-500 text-sm">Vui lòng chờ trong giây lát</p>
+      <div class="mt-6 flex justify-center gap-2">
+        <div class="w-2 h-2 bg-indigo-500 rounded-full animate-bounce"></div>
+        <div class="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.15s]"></div>
+        <div class="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.3s]"></div>
+      </div>
+    </div>
+
+    <div id="error" class="hidden">
+      <div class="text-red-500 text-4xl">✗</div>
+      <h2 class="mt-4 text-xl font-bold text-slate-800">Đăng nhập thất bại</h2>
+      <p id="errorMsg" class="mt-2 text-slate-500 text-sm"></p>
+      <a href="/login.html" class="mt-6 inline-block bg-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold text-sm">
+        Thử lại
+      </a>
+    </div>
+
+  </div>
+
+  <script>
+    const ZALO_APP_ID = "3321804211495068656";
+
+    function showError(msg) {
+      document.getElementById("loading").classList.add("hidden");
+      const errEl = document.getElementById("error");
+      errEl.classList.remove("hidden");
+      document.getElementById("errorMsg").textContent = msg;
+    }
+
+    async function run() {
+      const params = new URLSearchParams(location.search);
+      const code     = params.get("code");
+      const verifier = params.get("verifier");
+      const sid      = params.get("sid");
+
+      if (!code || !verifier || !sid) {
+        showError("Thiếu tham số xác thực. Vui lòng thử lại.");
+        return;
+      }
+
+      // ── Bước 1: Đổi code → access token (gọi từ browser, IP Việt Nam) ──────
+      let tokenData;
+      try {
+        const tokenRes = await fetch("https://oauth.zaloapp.com/v4/access_token", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            app_id:        ZALO_APP_ID,
+            code,
+            code_verifier: verifier,
+            grant_type:    "authorization_code",
+          }),
+        });
+
+        const raw = await tokenRes.text();
+        try { tokenData = JSON.parse(raw); }
+        catch { showError("Zalo trả về lỗi không hợp lệ: " + raw.slice(0, 100)); return; }
+
+        if (tokenData.error || !tokenData.access_token) {
+          showError("Lỗi lấy token: " + (tokenData.error_description || tokenData.message || JSON.stringify(tokenData)));
+          return;
+        }
+      } catch (err) {
+        showError("Không kết nối được Zalo: " + err.message);
+        return;
+      }
+
+      // ── Bước 2: Lấy thông tin profile ────────────────────────────────────────
+      let user;
+      try {
+        const profileRes = await fetch(
+          "https://graph.zalo.me/v2.0/me?fields=id,name,picture",
+          { headers: { access_token: tokenData.access_token } }
+        );
+
+        const profileData = await profileRes.json();
+
+        if (profileData.error || !profileData.id) {
+          showError("Không lấy được thông tin Zalo: " + (profileData.message || JSON.stringify(profileData)));
+          return;
+        }
+
+        user = {
+          id:      profileData.id,
+          name:    profileData.name || "Người dùng Zalo",
+          picture: profileData.picture?.data?.url || profileData.picture || "",
+        };
+      } catch (err) {
+        showError("Lỗi lấy profile: " + err.message);
+        return;
+      }
+
+      // ── Bước 3: Gửi user data về server để tạo session ───────────────────────
+      try {
+        const sessionRes = await fetch("/api/auth/session", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ sid, user }),
+        });
+
+        if (!sessionRes.ok) {
+          const err = await sessionRes.json().catch(() => ({}));
+          showError("Lỗi tạo session: " + (err.error || sessionRes.status));
+          return;
+        }
+      } catch (err) {
+        showError("Lỗi kết nối server: " + err.message);
+        return;
+      }
+
+      // ── Thành công → chuyển về trang chính ───────────────────────────────────
+      window.location.replace("/index.html");
+    }
+
+    run();
+  </script>
+</body>
+</html>
