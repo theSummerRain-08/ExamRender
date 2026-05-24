@@ -1,0 +1,14 @@
+# Cấu hình Cloudflare Pages cho ExamRender
+# Tài liệu: https://developers.cloudflare.com/pages/
+
+name = "examrender"
+
+# Thư mục chứa file tĩnh (index.html, login.html nằm ở root)
+pages_build_output_dir = "."
+
+# ── KV Namespace (dùng cho session) ─────────────────────────────────────────
+# Sau khi chạy lệnh tạo KV ở bước 3 trong DEPLOY.md,
+# thay REPLACE_WITH_YOUR_KV_ID bằng ID thực tế.
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "a9dcd828589f4027a10d455a21c1622e"
