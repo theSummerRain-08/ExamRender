@@ -17,6 +17,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <!-- html-docx-js -->
+    <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
     <!-- KaTeX -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
@@ -148,12 +150,22 @@
 
         <!-- Preview PDF + Lịch sử -->
         <div class="flex-1 overflow-y-auto p-4 space-y-4">
-          <div id="pdfPreview" class="bg-white rounded-2xl shadow-sm border p-6 min-h-[60vh]">
+          <div id="pdfPreview" class="bg-white rounded-2xl shadow-sm border p-6">
             <div class="flex flex-col items-center justify-center py-8 text-center">
-              <div class="text-3xl mb-2">📄</div>
+              <div class="text-3xl mb-2 text-slate-400"><i class="fa-regular fa-file-zipper"></i></div>
               <p class="text-sm font-semibold text-slate-500">Chưa có đề thi nào</p>
               <p class="text-xs text-slate-400 mt-1">Nhập yêu cầu ở tab "Tạo đề" để xem kết quả</p>
             </div>
+          </div>
+
+          <!-- Toolbar tải xuống — chỉ hiện khi có đề -->
+          <div id="examToolbar" class="hidden flex gap-2 justify-end -mt-1">
+            <button onclick="downloadAsPdf()" class="flex items-center gap-1.5 text-xs font-semibold bg-slate-50 text-slate-600 border border-slate-200 px-3 py-1.5 rounded-xl active:bg-slate-100 transition-colors">
+              <i class="fa-regular fa-file-pdf"></i> Tải PDF
+            </button>
+            <button onclick="downloadAsWord()" class="flex items-center gap-1.5 text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-xl active:bg-blue-100 transition-colors">
+              <i class="fa-regular fa-file-word"></i> Tải Word
+            </button>
           </div>
 
           <!-- Lịch sử 10 đề gần nhất -->
@@ -674,6 +686,56 @@
       let currentShareId   = null;   // UUID khi đã lưu lên KV
       let isSaving         = false;
 
+      // ── Tải PDF (dùng print) ──────────────────────────────────────────────
+      function downloadAsPdf() {
+        window.print();
+      }
+
+      // ── Tải Word (.docx) ──────────────────────────────────────────────────
+      function downloadAsWord() {
+        if (!currentExamHtml) return;
+        const safeTitle = (currentExamTitle || "de-thi")
+          .replace(/[^\w\sÀ-ɏḀ-ỿ]/g, "")
+          .trim().replace(/\s+/g, "-") || "de-thi";
+
+        const examCss = `
+          body { font-family: 'Times New Roman', serif; font-size: 14pt; line-height: 1.8; color: #1e293b; margin: 2cm; }
+          .exam-header { text-align: center; border-bottom: 2px solid #1e293b; padding-bottom: 12px; margin-bottom: 16px; }
+          .exam-header .school { font-size: 11pt; font-weight: 600; text-transform: uppercase; }
+          .exam-header .exam-title { font-size: 15pt; font-weight: 700; text-transform: uppercase; margin: 6px 0 4px; }
+          .exam-header .exam-meta { font-size: 11pt; color: #475569; }
+          .section-title { font-size: 13pt; font-weight: 700; text-transform: uppercase; margin: 18px 0 10px; }
+          .question { margin-bottom: 14px; }
+          .q-text { margin: 0 0 6px; }
+          .choices { display: table; width: 100%; }
+          .choice { display: inline-block; width: 48%; font-size: 12pt; padding: 2px 6px; }
+          .answer-key { border: 1px solid #e2e8f0; padding: 12px 16px; margin-top: 20px; }
+        `;
+
+        const fullHtml = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>${examCss}</style>
+</head>
+<body>${currentExamHtml}</body>
+</html>`;
+
+        try {
+          const blob = htmlDocx.asBlob(fullHtml, { orientation: "portrait", margins: { top: 1134, right: 1134, bottom: 1134, left: 1134 } });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${safeTitle}.docx`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        } catch (e) {
+          alert("Không thể tạo file Word: " + e.message);
+        }
+      }
+
       // ── Lưu đề lên KV, trả về share URL ──────────────────────────────────
       async function saveExam() {
         if (currentShareId) return `/exam-view.html?id=${currentShareId}`;
@@ -742,6 +804,7 @@
             pdfPreview.innerHTML = data.html;
             renderMath(pdfPreview);
             renderGeoGebraFigures(pdfPreview); // async — không cần await
+            document.getElementById("examToolbar").classList.remove("hidden");
 
             // Tự động chuyển tab
             switchTab("result");
@@ -985,6 +1048,7 @@
             pdfPreview.innerHTML = data.html;
             renderMath(pdfPreview);
             renderGeoGebraFigures(pdfPreview);
+            document.getElementById("examToolbar").classList.remove("hidden");
             switchTab("result");
 
             // Tự động lưu vào lịch sử (background)
@@ -1049,7 +1113,7 @@
         const titleEl = document.getElementById(`histTitle_${id}`);
         if (!titleEl) return;
         titleEl.outerHTML = `
-          <div class="flex gap-1 items-center flex-1 min-w-0" id="renameGroup_${id}">
+          <div class="flex gap-1 items-center flex-1 min-w-0" id="renameGroup_${id}" onclick="event.stopPropagation()">
             <input id="renameInput_${id}"
               class="flex-1 min-w-0 text-sm border border-indigo-300 rounded-lg px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-indigo-400"
               value="${escapeHtml(item.title)}" />

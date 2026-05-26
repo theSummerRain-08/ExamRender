@@ -6,6 +6,7 @@
   <title>Đăng nhập - AI Exam Generator</title>
   <link rel="icon" type="image/avif" href="/Image/graident-ai.avif" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
     body { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
     .card { border-radius: 2rem; }
@@ -39,12 +40,12 @@
           <span class="text-slate-700 text-sm font-medium">Sinh đề tự động bằng AI</span>
         </li>
         <li class="flex items-center gap-3">
-          <span class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-base flex-shrink-0">📄</span>
+          <span class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-base flex-shrink-0"><i class="fa-regular fa-file-pdf"></i></span>
           <span class="text-slate-700 text-sm font-medium">Xuất PDF đẹp chuẩn đề thi</span>
         </li>
         <li class="flex items-center gap-3">
-          <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-base flex-shrink-0">💬</span>
-          <span class="text-slate-700 text-sm font-medium">Gửi đề trực tiếp qua Zalo</span>
+          <span class="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-base flex-shrink-0"><i class="fa-regular fa-camera"></i></span>
+          <span class="text-slate-700 text-sm font-medium">Tạo đề bằng hình ảnh</span>
         </li>
       </ul>
 
@@ -53,9 +54,7 @@
       <!-- Zalo -->
       <button id="loginZaloBtn"
         class="w-full bg-blue-600 active:bg-blue-700 text-white py-3.5 rounded-2xl font-bold text-sm flex items-center justify-center gap-3 shadow-md transition-transform mb-3">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 48 48" fill="white">
-          <path d="M24 4C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm8 27H16v-3h7.5L16 19.5V17h16v3h-7.5L32 28.5V31z"/>
-        </svg>
+        <img src="/Image/logo-zalo-vector-thumbnail.jpg" class="w-6 h-6 rounded object-cover" />
         Đăng nhập bằng Zalo
       </button>
 
