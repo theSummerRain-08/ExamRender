@@ -1,0 +1,24 @@
+{
+  "name": "AI Exam Generator",
+  "short_name": "ThayBot",
+  "description": "Tạo đề thi tự động bằng AI cho giáo viên Việt Nam",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/Image/ios.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/Image/ios.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

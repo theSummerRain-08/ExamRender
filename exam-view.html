@@ -4,7 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Xem đề thi - AI Exam Generator</title>
+  <link rel="icon" type="image/avif" href="/Image/graident-ai.avif" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- KaTeX -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+          onload="katexReady = true; tryRenderMath();"></script>
   <style>
     /* ── Exam document styles ── */
     .exam-doc { font-family: "Times New Roman", serif; font-size: 14px; line-height: 1.7; color: #111; }
@@ -75,6 +81,302 @@
   </div>
 
   <script>
+    // ── KaTeX ───────────────────────────────────────────────────────────────
+    let katexReady = false;
+    let pendingMathEl = null;
+
+    function tryRenderMath() {
+      if (!katexReady || !pendingMathEl) return;
+      renderMathInElement(pendingMathEl, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "$",  right: "$",  display: false },
+          { left: "\\(", right: "\\)", display: false },
+          { left: "\\[", right: "\\]", display: true },
+        ],
+        throwOnError: false,
+      });
+      pendingMathEl = null;
+    }
+
+    function renderMath(el) {
+      pendingMathEl = el;
+      tryRenderMath();
+    }
+
+    // ── GeoGebra ─────────────────────────────────────────────────────────────
+    let _ggbScriptLoaded = false;
+
+    function loadGeoGebra() {
+      if (_ggbScriptLoaded || window.GGBApplet) { _ggbScriptLoaded = true; return Promise.resolve(); }
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://www.geogebra.org/apps/deployggb.js';
+        s.onload  = () => { _ggbScriptLoaded = true; resolve(); };
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+
+    // ── GeoGebra shape templates ─────────────────────────────────────────────
+    const _K = 0.35;
+    function _proj(X, Y, Z) { return [+(X+_K*Y).toFixed(3), +(Z+_K*Y).toFixed(3)]; }
+    function _pt(n, x, y)   { return `${n}=(${x},${y})`; }
+    function _seg(a, b)      { return `Segment(${a},${b})`; }
+    function _dash(n, a, b)  { return [`${n}=Segment(${a},${b})`, `SetLineStyle(${n},1)`]; }
+
+    function _shapeDefaults(t) {
+      return ({sphere:{w:185,h:185},box:{w:220,h:195},pyramid:{w:200,h:195},
+               prism:{w:195,h:215},cylinder:{w:170,h:205},cone:{w:165,h:205}})[t]||{w:200,h:170};
+    }
+    function _genCmds(cfg) {
+      const t = cfg.type;
+      if (t==='sphere')   return _tplSphere(cfg);
+      if (t==='box')      return _tplBox(cfg);
+      if (t==='pyramid')  return _tplPyramid(cfg);
+      if (t==='prism')    return _tplPrism(cfg);
+      if (t==='cylinder') return _tplCylinder(cfg);
+      if (t==='cone')     return _tplCone(cfg);
+      return [];
+    }
+    function _tplSphere({ r=3, labels={} }={}) {
+      const f=n=>+n.toFixed(3), lO=labels.O||'O';
+      return [
+        `${lO}=(0,0)`, `_circ=Circle(${lO},${r})`,
+        `_eA=(${f(-r)},0)`, `SetVisible(_eA,false)`,
+        `_eB=(${f(r)},0)`,  `SetVisible(_eB,false)`,
+        `_arcF=Semicircle(_eB,_eA)`,
+        `_arcB=Semicircle(_eA,_eB)`, `SetLineStyle(_arcB,1)`,
+        `_T=(0,${r})`,       `SetVisible(_T,false)`,
+        `_Bo=(0,${f(-r)})`,  `SetVisible(_Bo,false)`,
+      ];
+    }
+    function _tplBox({ a=4, b=3, c=3, labels={} }={}) {
+      const [lA,lB,lC,lD]   = [labels.A||'A',labels.B||'B',labels.C||'C',labels.D||'D'];
+      const [lA1,lB1,lC1,lD1] = [labels.A1||'A1',labels.B1||'B1',labels.C1||'C1',labels.D1||'D1'];
+      const [ax,ay]=_proj(0,0,0),[bx,by]=_proj(a,0,0),[cx,cy]=_proj(a,b,0),[dx,dy]=_proj(0,b,0);
+      const [a1x,a1y]=_proj(0,0,c),[b1x,b1y]=_proj(a,0,c),[c1x,c1y]=_proj(a,b,c),[d1x,d1y]=_proj(0,b,c);
+      return [
+        _pt(lA,ax,ay),_pt(lB,bx,by),_pt(lC,cx,cy),_pt(lD,dx,dy),
+        _pt(lA1,a1x,a1y),_pt(lB1,b1x,b1y),_pt(lC1,c1x,c1y),_pt(lD1,d1x,d1y),
+        _seg(lA,lB),_seg(lB,lC),
+        _seg(lA,lA1),_seg(lB,lB1),_seg(lC,lC1),
+        _seg(lA1,lB1),_seg(lB1,lC1),_seg(lC1,lD1),_seg(lD1,lA1),
+        ..._dash('_eAD',lA,lD),..._dash('_eDC',lD,lC),..._dash('_eDD1',lD,lD1),
+      ];
+    }
+    function _tplPyramid({ a=4, h=4, labels={} }={}) {
+      const [lA,lB,lC,lD,lS] = [labels.A||'A',labels.B||'B',labels.C||'C',labels.D||'D',labels.S||'S'];
+      const [ax,ay]=_proj(0,0,0),[bx,by]=_proj(a,0,0),[cx,cy]=_proj(a,a,0);
+      const [dx,dy]=_proj(0,a,0),[sx,sy]=_proj(a/2,a/2,h);
+      return [
+        _pt(lA,ax,ay),_pt(lB,bx,by),_pt(lC,cx,cy),_pt(lD,dx,dy),_pt(lS,sx,sy),
+        _seg(lA,lB),_seg(lB,lC),
+        _seg(lS,lA),_seg(lS,lB),_seg(lS,lC),
+        ..._dash('_eAD',lA,lD),..._dash('_eDC',lD,lC),..._dash('_eSD',lS,lD),
+      ];
+    }
+    function _tplPrism({ a=4, h=5, labels={} }={}) {
+      const [lA,lB,lC]   = [labels.A||'A',labels.B||'B',labels.C||'C'];
+      const [lA1,lB1,lC1] = [labels.A1||'A1',labels.B1||'B1',labels.C1||'C1'];
+      const s3h = +(Math.sqrt(3)/2).toFixed(4);
+      const [ax,ay]=_proj(0,0,0),[bx,by]=_proj(a,0,0),[cx,cy]=_proj(a/2,a*s3h,0);
+      const [a1x,a1y]=_proj(0,0,h),[b1x,b1y]=_proj(a,0,h),[c1x,c1y]=_proj(a/2,a*s3h,h);
+      return [
+        _pt(lA,ax,ay),_pt(lB,bx,by),_pt(lC,cx,cy),
+        _pt(lA1,a1x,a1y),_pt(lB1,b1x,b1y),_pt(lC1,c1x,c1y),
+        _seg(lA,lB),_seg(lB,lC),
+        _seg(lA1,lB1),_seg(lB1,lC1),_seg(lC1,lA1),
+        _seg(lA,lA1),_seg(lB,lB1),_seg(lC,lC1),
+        ..._dash('_eAC',lA,lC),
+      ];
+    }
+    function _tplCylinder({ r=3, h=5, labels={} }={}) {
+      const f=n=>+n.toFixed(3);
+      const ry=f(r*0.4), c=f(Math.sqrt(r*r-ry*ry));
+      return [
+        `_bF1=(${f(-c)},0)`,`_bF2=(${f(c)},0)`,`_bP=(${f(r)},0)`,
+        `bot_ell=Ellipse(_bF1,_bF2,_bP)`,
+        `SetVisible(_bF1,false)`,`SetVisible(_bF2,false)`,`SetVisible(_bP,false)`,
+        `_tF1=(${f(-c)},${f(h)})`,`_tF2=(${f(c)},${f(h)})`,`_tP=(${f(r)},${f(h)})`,
+        `top_ell=Ellipse(_tF1,_tF2,_tP)`,
+        `SetVisible(_tF1,false)`,`SetVisible(_tF2,false)`,`SetVisible(_tP,false)`,
+        `_lB=(${f(-r)},0)`,`_rB=(${f(r)},0)`,
+        `_lT=(${f(-r)},${f(h)})`,`_rT=(${f(r)},${f(h)})`,
+        `side_L=Segment(_lB,_lT)`,`side_R=Segment(_rB,_rT)`,
+        `SetVisible(_lB,false)`,`SetVisible(_rB,false)`,
+        `SetVisible(_lT,false)`,`SetVisible(_rT,false)`,
+      ];
+    }
+    function _tplCone({ r=3, h=5, labels={} }={}) {
+      const f=n=>+n.toFixed(3);
+      const ry=f(r*0.4), c=f(Math.sqrt(r*r-ry*ry));
+      const lS=labels.S||'S', lO=labels.O||'O';
+      return [
+        `${lS}=(0,${f(h)})`,`${lO}=(0,0)`,
+        `_cF1=(${f(-c)},0)`,`_cF2=(${f(c)},0)`,`_cP=(${f(r)},0)`,
+        `base_ell=Ellipse(_cF1,_cF2,_cP)`,
+        `SetVisible(_cF1,false)`,`SetVisible(_cF2,false)`,`SetVisible(_cP,false)`,
+        `_lB=(${f(-r)},0)`,`_rB=(${f(r)},0)`,
+        `lat_L=Segment(${lS},_lB)`,`lat_R=Segment(${lS},_rB)`,
+        `SetVisible(_lB,false)`,`SetVisible(_rB,false)`,
+      ];
+    }
+    // ── End templates ────────────────────────────────────────────────────────
+
+    async function renderGeoGebraFigures(container) {
+      const figs = [...container.querySelectorAll('.ggb-figure')];
+      if (!figs.length) return;
+
+      try { await loadGeoGebra(); }
+      catch {
+        figs.forEach(f => {
+          f.innerHTML = '<p style="color:#ef4444;font-size:12px;text-align:center;padding:12px">⚠ Không thể tải GeoGebra — kiểm tra kết nối mạng</p>';
+        });
+        return;
+      }
+
+      let seq = 0;
+      for (const fig of figs) {
+        let cfg, cmds;
+        if (fig.dataset.shape) {
+          // Đường dẫn template mới: data-shape='{"type":"pyramid","a":4,"h":5,...}'
+          try { cfg = JSON.parse(fig.dataset.shape); }
+          catch {
+            fig.innerHTML = '<p style="color:#ef4444;font-size:12px;text-align:center;padding:12px">⚠ Dữ liệu hình bị lỗi</p>';
+            continue;
+          }
+          const def = _shapeDefaults(cfg.type);
+          cfg.w = cfg.w || def.w;
+          cfg.h = cfg.h || def.h;
+          cmds = _genCmds(cfg);
+        } else {
+          // Đường dẫn legacy: data-ggb='{"cmds":[...],"w":200,"h":160}'
+          try { cfg = JSON.parse(fig.dataset.ggb); }
+          catch {
+            fig.innerHTML = '<p style="color:#ef4444;font-size:12px;text-align:center;padding:12px">⚠ Dữ liệu hình bị lỗi</p>';
+            continue;
+          }
+          cmds = Array.isArray(cfg.cmds) ? cfg.cmds : [];
+        }
+
+        const uid  = `ggb_${Date.now()}_${seq++}`;
+        const maxW = Math.max((container.clientWidth || 500) - 48, 140);
+        const w    = Math.min(cfg.w || 200, maxW);
+        const h    = cfg.h || 160;
+        const cap  = cfg.cap || '';
+
+        fig.id = uid;
+        fig.style.cssText += `display:block;min-height:${h}px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;overflow:hidden;`;
+        fig.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:${h}px;color:#94a3b8;font-size:13px">⏳ Đang vẽ hình...</div>`;
+
+        await new Promise(resolve => {
+          const params = {
+            id: uid,
+            appName: 'geometry',
+            width:  w,
+            height: h,
+            showMenuBar: false,
+            showAlgebraInput: false,
+            showToolBar: false,
+            showResetIcon: false,
+            showAxes: false,
+            showGrid: false,
+            enableLabelDrags: false,
+            enableRightClick: false,
+            enableShiftDragZoom: false,
+            borderColor: 'transparent',
+            backgroundColor: '#ffffff',
+            appletOnLoad() {
+              const api = window[uid];
+              if (!api) { resolve(); return; }
+
+              api.evalCommand('ShowAxes(false)');
+              api.evalCommand('ShowGrid(false)');
+
+              cmds.forEach(cmd => {
+                try { api.evalCommand(cmd); }
+                catch(e) { console.warn('[GGB] cmd:', cmd, e); }
+              });
+
+              // Auto-fit viewport — nhận diện điểm, Circle, Semicircle
+              try {
+                const coords = [];
+                const namedPts = {};
+
+                cmds.forEach(cmd => {
+                  const defM = cmd.match(/^(\w+)\s*=\s*\(\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*\)/);
+                  if (defM) {
+                    namedPts[defM[1]] = [+defM[2], +defM[3]];
+                    coords.push([+defM[2], +defM[3]]);
+                  }
+                  for (const m of cmd.matchAll(/\(\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*\)/g)) {
+                    coords.push([+m[1], +m[2]]);
+                  }
+                  const circN = cmd.match(/Circle\(\s*(\w+)\s*,\s*([\d.]+)\s*\)/);
+                  if (circN && namedPts[circN[1]]) {
+                    const [cx, cy] = namedPts[circN[1]], r = +circN[2];
+                    coords.push([cx-r,cy],[cx+r,cy],[cx,cy-r],[cx,cy+r]);
+                  }
+                  const circI = cmd.match(/Circle\(\s*\(\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*\)\s*,\s*([\d.]+)\s*\)/);
+                  if (circI) {
+                    const cx=+circI[1], cy=+circI[2], r=+circI[3];
+                    coords.push([cx-r,cy],[cx+r,cy],[cx,cy-r],[cx,cy+r]);
+                  }
+                });
+
+                if (coords.length) {
+                  const xs = coords.map(p=>p[0]), ys = coords.map(p=>p[1]);
+                  const pw = Math.max((Math.max(...xs)-Math.min(...xs))*0.14, 0.5);
+                  const ph = Math.max((Math.max(...ys)-Math.min(...ys))*0.14, 0.5);
+                  api.setCoordSystem(Math.min(...xs)-pw, Math.max(...xs)+pw,
+                                     Math.min(...ys)-ph, Math.max(...ys)+ph);
+                }
+              } catch {}
+
+              setTimeout(() => {
+                try {
+                  const n = api.getObjectNumber();
+                  for (let i = 0; i < n; i++) {
+                    const name = api.getObjectName(i);
+                    const type = api.getObjectType(name);
+                    api.setColor(name, 0, 0, 0);
+                    if (type === 'point') {
+                      api.setPointSize(name, 2);
+                      api.setLabelStyle(name, 0);
+                    } else {
+                      try { api.setLineThickness(name, 2); } catch {}
+                    }
+                  }
+                } catch {}
+
+                setTimeout(() => {
+                  try {
+                    const b64 = api.getPNGBase64(1.5, false, 96);
+                    fig.innerHTML = `
+                      <figure style="text-align:center;margin:0;padding:8px 0">
+                        <img src="data:image/png;base64,${b64}"
+                             style="width:${w}px;max-width:100%;display:block;margin:0 auto"
+                             alt="${cap}">
+                        ${cap ? `<figcaption style="font-size:12px;color:#64748b;margin-top:6px;font-style:italic">${cap}</figcaption>` : ''}
+                      </figure>`;
+                    fig.style.cssText = '';
+                  } catch(e) {
+                    console.warn('[GGB] PNG export failed:', e);
+                  }
+                  resolve();
+                }, 700);
+              }, 700);
+            }
+          };
+
+          try { new GGBApplet(params, true).inject(uid); }
+          catch(e) { console.warn('[GGB] inject failed:', e); resolve(); }
+        });
+      }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     const params = new URLSearchParams(location.search);
     const id = params.get("id");
 
@@ -107,7 +409,10 @@
       document.getElementById("examTitle").textContent = exam.title || "Đề thi";
 
       // Render HTML
-      document.getElementById("examBody").innerHTML = exam.html || "";
+      const examBody = document.getElementById("examBody");
+      examBody.innerHTML = exam.html || "";
+      renderMath(examBody);
+      renderGeoGebraFigures(examBody); // async — không cần await
       document.getElementById("examContent").classList.remove("hidden");
 
       // Meta

@@ -5,7 +5,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>AI Exam Generator</title>
+    <link rel="icon" type="image/avif" href="/Image/graident-ai.avif" />
+
+    <!-- PWA / Thêm vào màn hình chính iOS & Android -->
+    <link rel="apple-touch-icon" href="/Image/ios.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="ThayBot" />
+    <meta name="theme-color" content="#4f46e5" />
+    <link rel="manifest" href="/manifest.json" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+            onload="katexReady = true; tryRenderMath();"></script>
     <style>
       ::-webkit-scrollbar { width: 4px; }
       ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
@@ -27,6 +41,19 @@
       .choice { font-size: 13px; }
       .answer-key { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 16px; margin-top: 20px; }
       .answer-key p { margin: 4px 0; font-size: 13px; }
+
+      /* ── Chat Hỏi đáp styles ── */
+      .chat-answer { font-family: 'Times New Roman', serif; font-size: 14px; line-height: 1.8; }
+      .chat-answer p  { margin: 6px 0; }
+      .chat-answer ul { list-style: disc; padding-left: 20px; margin: 6px 0; }
+      .chat-answer ol { list-style: decimal; padding-left: 20px; margin: 6px 0; }
+      .chat-answer li { margin: 3px 0; }
+      .chat-answer strong { font-weight: 700; }
+      .chat-answer .katex-display { margin: 10px 0; overflow-x: auto; }
+      .typing-dot { animation: typingBounce 1s infinite; }
+      .typing-dot:nth-child(2) { animation-delay: 0.15s; }
+      .typing-dot:nth-child(3) { animation-delay: 0.3s; }
+      @keyframes typingBounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-5px)} }
 
       /* ── Print styles ── */
       @media print {
@@ -151,6 +178,49 @@
 
       </div>
 
+      <!-- ── TAB 3: HỎI ĐÁP ───────────────────────────────────────────────── -->
+      <div id="tabChat" class="flex-1 flex flex-col overflow-hidden hidden">
+
+        <!-- Lịch sử chat -->
+        <div id="chatMessages" class="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+
+          <!-- Tin nhắn chào -->
+          <div class="flex gap-2 items-end">
+            <img src="/Image/graident-ai.avif" alt="AI" class="w-8 h-8 rounded-xl object-cover flex-shrink-0" />
+            <div class="bg-white rounded-2xl rounded-bl-md px-4 py-3 text-sm shadow-sm border max-w-[85%] leading-relaxed">
+              Xin chào! 👋 Tôi có thể giải đáp các câu hỏi về toán học.<br/><br/>
+              Ví dụ: <em class="text-violet-600 not-italic">"Giải phương trình bậc 2 có delta bằng 0"</em> hoặc <em class="text-violet-600 not-italic">"Công thức tính thể tích hình chóp?"</em>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Ô nhập liệu -->
+        <div class="bg-white border-t px-3 py-3 pb-safe flex-shrink-0 shadow-[0_-2px_8px_rgba(0,0,0,0.06)]">
+          <div class="flex gap-2 items-end">
+            <textarea
+              id="chatInput"
+              placeholder="Hỏi bất kỳ câu hỏi toán nào..."
+              rows="2"
+              class="flex-1 resize-none rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-400 px-4 py-3 text-sm leading-relaxed bg-slate-50"
+            ></textarea>
+            <button
+              id="chatSendBtn"
+              class="w-14 h-14 bg-violet-600 active:bg-violet-800 text-white rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md transition-transform active:scale-95">
+              <svg id="chatSendIcon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
+                   stroke="currentColor" stroke-width="2.2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+              </svg>
+              <svg id="chatLoadingIcon" class="hidden animate-spin" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" stroke="white" stroke-width="3" opacity=".3"/>
+                <path d="M12 2a10 10 0 0 1 10 10" stroke="white" stroke-width="3" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
     </main>
 
     <!-- ══ BOTTOM TAB BAR ══════════════════════════════════════════════════ -->
@@ -176,10 +246,326 @@
         <span class="text-xs font-medium">Kết quả</span>
       </button>
 
+      <button id="btnTabChat" onclick="switchTab('chat')"
+              class="flex-1 flex flex-col items-center justify-center py-3 gap-1 text-slate-400 border-t-2 border-transparent transition">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
+             stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+        </svg>
+        <span class="text-xs font-medium">Hỏi đáp</span>
+      </button>
+
     </nav>
 
     <!-- ══ SCRIPTS ══════════════════════════════════════════════════════════ -->
     <script>
+      // ── KaTeX ───────────────────────────────────────────────────────────
+      let katexReady = false;
+      let pendingMathEl = null;
+
+      function tryRenderMath() {
+        if (!katexReady || !pendingMathEl) return;
+        renderMathInElement(pendingMathEl, {
+          delimiters: [
+            { left: "$$", right: "$$", display: true },
+            { left: "$",  right: "$",  display: false },
+            { left: "\\(", right: "\\)", display: false },
+            { left: "\\[", right: "\\]", display: true },
+          ],
+          throwOnError: false,
+        });
+        pendingMathEl = null;
+      }
+
+      function renderMath(el) {
+        pendingMathEl = el;
+        tryRenderMath();
+      }
+
+      // ── GeoGebra ─────────────────────────────────────────────────────────
+      let _ggbScriptLoaded = false;
+
+      function loadGeoGebra() {
+        if (_ggbScriptLoaded || window.GGBApplet) { _ggbScriptLoaded = true; return Promise.resolve(); }
+        return new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = 'https://www.geogebra.org/apps/deployggb.js';
+          s.onload  = () => { _ggbScriptLoaded = true; resolve(); };
+          s.onerror = reject;
+          document.head.appendChild(s);
+        });
+      }
+
+      // ── GeoGebra shape templates ───────────────────────────────────────────
+      const _K = 0.35;
+      function _proj(X, Y, Z) { return [+(X+_K*Y).toFixed(3), +(Z+_K*Y).toFixed(3)]; }
+      function _pt(n, x, y)   { return `${n}=(${x},${y})`; }
+      function _seg(a, b)      { return `Segment(${a},${b})`; }
+      function _dash(n, a, b)  { return [`${n}=Segment(${a},${b})`, `SetLineStyle(${n},1)`]; }
+
+      function _shapeDefaults(t) {
+        return ({sphere:{w:185,h:185},box:{w:220,h:195},pyramid:{w:200,h:195},
+                 prism:{w:195,h:215},cylinder:{w:170,h:205},cone:{w:165,h:205}})[t]||{w:200,h:170};
+      }
+      function _genCmds(cfg) {
+        const t = cfg.type;
+        if (t==='sphere')   return _tplSphere(cfg);
+        if (t==='box')      return _tplBox(cfg);
+        if (t==='pyramid')  return _tplPyramid(cfg);
+        if (t==='prism')    return _tplPrism(cfg);
+        if (t==='cylinder') return _tplCylinder(cfg);
+        if (t==='cone')     return _tplCone(cfg);
+        return [];
+      }
+      function _tplSphere({ r=3, labels={} }={}) {
+        const f=n=>+n.toFixed(3), lO=labels.O||'O';
+        return [
+          `${lO}=(0,0)`, `_circ=Circle(${lO},${r})`,
+          `_eA=(${f(-r)},0)`, `SetVisible(_eA,false)`,
+          `_eB=(${f(r)},0)`,  `SetVisible(_eB,false)`,
+          `_arcF=Semicircle(_eB,_eA)`,
+          `_arcB=Semicircle(_eA,_eB)`, `SetLineStyle(_arcB,1)`,
+          `_T=(0,${r})`,       `SetVisible(_T,false)`,
+          `_Bo=(0,${f(-r)})`,  `SetVisible(_Bo,false)`,
+        ];
+      }
+      function _tplBox({ a=4, b=3, c=3, labels={} }={}) {
+        const [lA,lB,lC,lD]   = [labels.A||'A',labels.B||'B',labels.C||'C',labels.D||'D'];
+        const [lA1,lB1,lC1,lD1] = [labels.A1||'A1',labels.B1||'B1',labels.C1||'C1',labels.D1||'D1'];
+        const [ax,ay]=_proj(0,0,0),[bx,by]=_proj(a,0,0),[cx,cy]=_proj(a,b,0),[dx,dy]=_proj(0,b,0);
+        const [a1x,a1y]=_proj(0,0,c),[b1x,b1y]=_proj(a,0,c),[c1x,c1y]=_proj(a,b,c),[d1x,d1y]=_proj(0,b,c);
+        return [
+          _pt(lA,ax,ay),_pt(lB,bx,by),_pt(lC,cx,cy),_pt(lD,dx,dy),
+          _pt(lA1,a1x,a1y),_pt(lB1,b1x,b1y),_pt(lC1,c1x,c1y),_pt(lD1,d1x,d1y),
+          _seg(lA,lB),_seg(lB,lC),
+          _seg(lA,lA1),_seg(lB,lB1),_seg(lC,lC1),
+          _seg(lA1,lB1),_seg(lB1,lC1),_seg(lC1,lD1),_seg(lD1,lA1),
+          ..._dash('_eAD',lA,lD),..._dash('_eDC',lD,lC),..._dash('_eDD1',lD,lD1),
+        ];
+      }
+      function _tplPyramid({ a=4, h=4, labels={} }={}) {
+        const [lA,lB,lC,lD,lS] = [labels.A||'A',labels.B||'B',labels.C||'C',labels.D||'D',labels.S||'S'];
+        const [ax,ay]=_proj(0,0,0),[bx,by]=_proj(a,0,0),[cx,cy]=_proj(a,a,0);
+        const [dx,dy]=_proj(0,a,0),[sx,sy]=_proj(a/2,a/2,h);
+        return [
+          _pt(lA,ax,ay),_pt(lB,bx,by),_pt(lC,cx,cy),_pt(lD,dx,dy),_pt(lS,sx,sy),
+          _seg(lA,lB),_seg(lB,lC),
+          _seg(lS,lA),_seg(lS,lB),_seg(lS,lC),
+          ..._dash('_eAD',lA,lD),..._dash('_eDC',lD,lC),..._dash('_eSD',lS,lD),
+        ];
+      }
+      function _tplPrism({ a=4, h=5, labels={} }={}) {
+        const [lA,lB,lC]   = [labels.A||'A',labels.B||'B',labels.C||'C'];
+        const [lA1,lB1,lC1] = [labels.A1||'A1',labels.B1||'B1',labels.C1||'C1'];
+        const s3h = +(Math.sqrt(3)/2).toFixed(4);
+        const [ax,ay]=_proj(0,0,0),[bx,by]=_proj(a,0,0),[cx,cy]=_proj(a/2,a*s3h,0);
+        const [a1x,a1y]=_proj(0,0,h),[b1x,b1y]=_proj(a,0,h),[c1x,c1y]=_proj(a/2,a*s3h,h);
+        return [
+          _pt(lA,ax,ay),_pt(lB,bx,by),_pt(lC,cx,cy),
+          _pt(lA1,a1x,a1y),_pt(lB1,b1x,b1y),_pt(lC1,c1x,c1y),
+          _seg(lA,lB),_seg(lB,lC),
+          _seg(lA1,lB1),_seg(lB1,lC1),_seg(lC1,lA1),
+          _seg(lA,lA1),_seg(lB,lB1),_seg(lC,lC1),
+          ..._dash('_eAC',lA,lC),
+        ];
+      }
+      function _tplCylinder({ r=3, h=5, labels={} }={}) {
+        const f=n=>+n.toFixed(3);
+        const ry=f(r*0.4), c=f(Math.sqrt(r*r-ry*ry));
+        return [
+          `_bF1=(${f(-c)},0)`,`_bF2=(${f(c)},0)`,`_bP=(${f(r)},0)`,
+          `bot_ell=Ellipse(_bF1,_bF2,_bP)`,
+          `SetVisible(_bF1,false)`,`SetVisible(_bF2,false)`,`SetVisible(_bP,false)`,
+          `_tF1=(${f(-c)},${f(h)})`,`_tF2=(${f(c)},${f(h)})`,`_tP=(${f(r)},${f(h)})`,
+          `top_ell=Ellipse(_tF1,_tF2,_tP)`,
+          `SetVisible(_tF1,false)`,`SetVisible(_tF2,false)`,`SetVisible(_tP,false)`,
+          `_lB=(${f(-r)},0)`,`_rB=(${f(r)},0)`,
+          `_lT=(${f(-r)},${f(h)})`,`_rT=(${f(r)},${f(h)})`,
+          `side_L=Segment(_lB,_lT)`,`side_R=Segment(_rB,_rT)`,
+          `SetVisible(_lB,false)`,`SetVisible(_rB,false)`,
+          `SetVisible(_lT,false)`,`SetVisible(_rT,false)`,
+        ];
+      }
+      function _tplCone({ r=3, h=5, labels={} }={}) {
+        const f=n=>+n.toFixed(3);
+        const ry=f(r*0.4), c=f(Math.sqrt(r*r-ry*ry));
+        const lS=labels.S||'S', lO=labels.O||'O';
+        return [
+          `${lS}=(0,${f(h)})`,`${lO}=(0,0)`,
+          `_cF1=(${f(-c)},0)`,`_cF2=(${f(c)},0)`,`_cP=(${f(r)},0)`,
+          `base_ell=Ellipse(_cF1,_cF2,_cP)`,
+          `SetVisible(_cF1,false)`,`SetVisible(_cF2,false)`,`SetVisible(_cP,false)`,
+          `_lB=(${f(-r)},0)`,`_rB=(${f(r)},0)`,
+          `lat_L=Segment(${lS},_lB)`,`lat_R=Segment(${lS},_rB)`,
+          `SetVisible(_lB,false)`,`SetVisible(_rB,false)`,
+        ];
+      }
+      // ── End templates ──────────────────────────────────────────────────────
+
+      async function renderGeoGebraFigures(container) {
+        const figs = [...container.querySelectorAll('.ggb-figure')];
+        if (!figs.length) return;
+
+        try {
+          await loadGeoGebra();
+        } catch {
+          figs.forEach(f => {
+            f.innerHTML = '<p style="color:#ef4444;font-size:12px;text-align:center;padding:12px">⚠ Không thể tải GeoGebra — kiểm tra kết nối mạng</p>';
+          });
+          return;
+        }
+
+        let seq = 0;
+        for (const fig of figs) {
+          let cfg, cmds;
+          if (fig.dataset.shape) {
+            // Đường dẫn template mới: data-shape='{"type":"pyramid","a":4,"h":5,...}'
+            try { cfg = JSON.parse(fig.dataset.shape); }
+            catch {
+              fig.innerHTML = '<p style="color:#ef4444;font-size:12px;text-align:center;padding:12px">⚠ Dữ liệu hình bị lỗi</p>';
+              continue;
+            }
+            const def = _shapeDefaults(cfg.type);
+            cfg.w = cfg.w || def.w;
+            cfg.h = cfg.h || def.h;
+            cmds = _genCmds(cfg);
+          } else {
+            // Đường dẫn legacy: data-ggb='{"cmds":[...],"w":200,"h":160}'
+            try { cfg = JSON.parse(fig.dataset.ggb); }
+            catch {
+              fig.innerHTML = '<p style="color:#ef4444;font-size:12px;text-align:center;padding:12px">⚠ Dữ liệu hình bị lỗi</p>';
+              continue;
+            }
+            cmds = Array.isArray(cfg.cmds) ? cfg.cmds : [];
+          }
+
+          const uid  = `ggb_${Date.now()}_${seq++}`;
+          // Responsive: không vượt quá chiều rộng container
+          const maxW = Math.max((container.clientWidth || 340) - 32, 140);
+          const w    = Math.min(cfg.w || 200, maxW);
+          const h    = cfg.h || 160;
+          const cap  = cfg.cap || '';
+          // Luôn dùng geometry 2D — hình 3D dùng phép chiếu xiên góc trong cmds
+
+          fig.id = uid;
+          fig.style.cssText += `display:block;min-height:${h}px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;overflow:hidden;`;
+          fig.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:${h}px;color:#94a3b8;font-size:13px">⏳ Đang vẽ hình...</div>`;
+
+          await new Promise(resolve => {
+            const params = {
+              id: uid,
+              appName: 'geometry',   // LUÔN dùng 2D — không dùng '3d'
+              width:  w,
+              height: h,
+              showMenuBar: false,
+              showAlgebraInput: false,
+              showToolBar: false,
+              showResetIcon: false,
+              showAxes: false,
+              showGrid: false,
+              enableLabelDrags: false,
+              enableRightClick: false,
+              enableShiftDragZoom: false,
+              borderColor: 'transparent',
+              backgroundColor: '#ffffff',
+              appletOnLoad() {
+                const api = window[uid];
+                if (!api) { resolve(); return; }
+
+                // Ẩn trục và lưới
+                api.evalCommand('ShowAxes(false)');
+                api.evalCommand('ShowGrid(false)');
+
+                // Thực thi lệnh vẽ
+                cmds.forEach(cmd => {
+                  try { api.evalCommand(cmd); }
+                  catch(e) { console.warn('[GGB] cmd:', cmd, e); }
+                });
+
+                // Auto-fit viewport — nhận diện điểm, Circle, Semicircle
+                try {
+                  const coords = [];
+                  const namedPts = {}; // lưu tọa độ điểm đã khai báo: NAME=(x,y)
+
+                  cmds.forEach(cmd => {
+                    // 1. Khai báo điểm: NAME=(x,y) hoặc NAME = (x,y)
+                    const defM = cmd.match(/^(\w+)\s*=\s*\(\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*\)/);
+                    if (defM) {
+                      namedPts[defM[1]] = [+defM[2], +defM[3]];
+                      coords.push([+defM[2], +defM[3]]);
+                    }
+                    // 2. Tọa độ inline: (x,y) bất kỳ trong lệnh
+                    for (const m of cmd.matchAll(/\(\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*\)/g)) {
+                      coords.push([+m[1], +m[2]]);
+                    }
+                    // 3. Circle(tenDiem, r) — mở rộng viewport theo bán kính
+                    const circN = cmd.match(/Circle\(\s*(\w+)\s*,\s*([\d.]+)\s*\)/);
+                    if (circN && namedPts[circN[1]]) {
+                      const [cx, cy] = namedPts[circN[1]], r = +circN[2];
+                      coords.push([cx-r,cy],[cx+r,cy],[cx,cy-r],[cx,cy+r]);
+                    }
+                    // 4. Circle((x,y), r) — tâm inline
+                    const circI = cmd.match(/Circle\(\s*\(\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*\)\s*,\s*([\d.]+)\s*\)/);
+                    if (circI) {
+                      const cx=+circI[1], cy=+circI[2], r=+circI[3];
+                      coords.push([cx-r,cy],[cx+r,cy],[cx,cy-r],[cx,cy+r]);
+                    }
+                  });
+
+                  if (coords.length) {
+                    const xs = coords.map(p=>p[0]), ys = coords.map(p=>p[1]);
+                    const pw = Math.max((Math.max(...xs)-Math.min(...xs))*0.14, 0.5);
+                    const ph = Math.max((Math.max(...ys)-Math.min(...ys))*0.14, 0.5);
+                    api.setCoordSystem(Math.min(...xs)-pw, Math.max(...xs)+pw,
+                                       Math.min(...ys)-ph, Math.max(...ys)+ph);
+                  }
+                } catch {}
+
+                // Tô đen và căn chỉnh style tất cả đối tượng
+                setTimeout(() => {
+                  try {
+                    const n = api.getObjectNumber();
+                    for (let i = 0; i < n; i++) {
+                      const name = api.getObjectName(i);
+                      const type = api.getObjectType(name);
+                      api.setColor(name, 0, 0, 0);
+                      if (type === 'point') {
+                        api.setPointSize(name, 2);
+                        api.setLabelStyle(name, 0);
+                      } else {
+                        try { api.setLineThickness(name, 2); } catch {}
+                      }
+                    }
+                  } catch {}
+
+                  // Export PNG sau khi GeoGebra render xong
+                  setTimeout(() => {
+                    try {
+                      const b64 = api.getPNGBase64(1.5, false, 96);
+                      fig.innerHTML = `
+                        <figure style="text-align:center;margin:0;padding:8px 0">
+                          <img src="data:image/png;base64,${b64}"
+                               style="width:${w}px;max-width:100%;display:block;margin:0 auto"
+                               alt="${cap}">
+                          ${cap ? `<figcaption style="font-size:12px;color:#64748b;margin-top:6px;font-style:italic">${cap}</figcaption>` : ''}
+                        </figure>`;
+                      fig.style.cssText = '';
+                    } catch(e) {
+                      console.warn('[GGB] PNG export failed:', e);
+                    }
+                    resolve();
+                  }, 700);
+                }, 700);
+              }
+            };
+
+            try { new GGBApplet(params, true).inject(uid); }
+            catch(e) { console.warn('[GGB] inject failed:', e); resolve(); }
+          });
+        }
+      }
+
       // ── Auth ────────────────────────────────────────────────────────────
       const userName   = document.getElementById("userName");
       const userAvatar = document.getElementById("userAvatar");
@@ -201,18 +587,19 @@
 
       // ── Tab switching ────────────────────────────────────────────────────
       function switchTab(tab) {
-        const isCreate = tab === "create";
+        const tabs = ['create', 'result', 'chat'];
+        const colors = { create: 'indigo', result: 'indigo', chat: 'violet' };
 
-        document.getElementById("tabCreate").classList.toggle("hidden", !isCreate);
-        document.getElementById("tabResult").classList.toggle("hidden", isCreate);
-
-        const activeClass   = "text-indigo-600 border-t-2 border-indigo-600";
-        const inactiveClass = "text-slate-400 border-t-2 border-transparent";
-
-        document.getElementById("btnTabCreate").className =
-          `flex-1 flex flex-col items-center justify-center py-3 gap-1 transition ${isCreate ? activeClass : inactiveClass}`;
-        document.getElementById("btnTabResult").className =
-          `flex-1 flex flex-col items-center justify-center py-3 gap-1 transition ${!isCreate ? activeClass : inactiveClass}`;
+        tabs.forEach(t => {
+          document.getElementById(`tab${t.charAt(0).toUpperCase()+t.slice(1)}`).classList.toggle('hidden', t !== tab);
+          const btn = document.getElementById(`btnTab${t.charAt(0).toUpperCase()+t.slice(1)}`);
+          if (!btn) return;
+          const active = t === tab;
+          const color  = colors[tab];
+          btn.className = `flex-1 flex flex-col items-center justify-center py-3 gap-1 transition ${
+            active ? `text-${color}-600 border-t-2 border-${color}-600` : 'text-slate-400 border-t-2 border-transparent'
+          }`;
+        });
       }
 
       // ── Gửi tin nhắn ────────────────────────────────────────────────────
@@ -365,6 +752,8 @@
 
             // Hiển thị đề thi trong tab Kết quả
             pdfPreview.innerHTML = data.html;
+            renderMath(pdfPreview);
+            renderGeoGebraFigures(pdfPreview); // async — không cần await
 
             // Tự động chuyển tab
             switchTab("result");
@@ -381,6 +770,109 @@
         if (e.key === "Enter" && !e.shiftKey) {
           e.preventDefault();
           generateBtn.click();
+        }
+      });
+
+      // ── HỎI ĐÁP ─────────────────────────────────────────────────────────
+      const chatMessages   = document.getElementById("chatMessages");
+      const chatInput      = document.getElementById("chatInput");
+      const chatSendBtn    = document.getElementById("chatSendBtn");
+      const chatSendIcon   = document.getElementById("chatSendIcon");
+      const chatLoadIcon   = document.getElementById("chatLoadingIcon");
+
+      // Lịch sử hội thoại gửi lên API (dạng [{role,content}])
+      const chatHistory = [];
+
+      function addChatMessage(html, isUser = false) {
+        const wrapper = document.createElement("div");
+        wrapper.className = isUser ? "flex justify-end" : "flex gap-2 items-start";
+
+        if (isUser) {
+          wrapper.innerHTML = `
+            <div class="bg-violet-600 text-white rounded-2xl rounded-tr-md px-4 py-3 text-sm max-w-[85%] leading-relaxed shadow-sm">
+              ${html}
+            </div>`;
+        } else {
+          wrapper.innerHTML = `
+            <img src="/Image/graident-ai.avif" alt="AI" class="w-8 h-8 rounded-xl object-cover flex-shrink-0 mt-1" />
+            <div class="bg-white rounded-2xl rounded-bl-md px-4 py-3 text-sm shadow-sm border max-w-[85%] chat-answer">
+              ${html}
+            </div>`;
+        }
+
+        chatMessages.appendChild(wrapper);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        return wrapper;
+      }
+
+      function setChatLoading(on) {
+        chatSendBtn.disabled = on;
+        chatSendIcon.classList.toggle("hidden", on);
+        chatLoadIcon.classList.toggle("hidden", !on);
+      }
+
+      chatSendBtn.addEventListener("click", async () => {
+        const text = chatInput.value.trim();
+        if (!text || chatSendBtn.disabled) return;
+
+        addChatMessage(text.replace(/\n/g, "<br/>"), true);
+        chatInput.value = "";
+        setChatLoading(true);
+
+        // Typing indicator
+        const typingWrapper = addChatMessage(`
+          <span class="flex gap-1 items-center h-5">
+            <span class="typing-dot w-2 h-2 bg-violet-400 rounded-full inline-block"></span>
+            <span class="typing-dot w-2 h-2 bg-violet-400 rounded-full inline-block"></span>
+            <span class="typing-dot w-2 h-2 bg-violet-400 rounded-full inline-block"></span>
+          </span>
+        `);
+        const typingBubble = typingWrapper.querySelector("div:last-child");
+
+        // Thêm vào lịch sử
+        chatHistory.push({ role: "user", content: text });
+
+        try {
+          const res = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ history: chatHistory }),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok || data.error) {
+            typingBubble.innerHTML = `<span class="text-red-500">❌ Lỗi: ${data.error || "Không thể kết nối AI"}</span>`;
+            chatHistory.pop(); // rollback
+          } else {
+            typingBubble.innerHTML = data.html;
+            typingBubble.classList.add("chat-answer");
+
+            // Lưu lịch sử phản hồi
+            chatHistory.push({ role: "assistant", content: data.text });
+
+            // Render toán học
+            renderMath(typingBubble);
+
+            // Render GeoGebra nếu có hình vẽ
+            if (typingBubble.querySelector(".ggb-figure")) {
+              renderGeoGebraFigures(typingBubble);
+            }
+
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+          }
+        } catch (err) {
+          typingBubble.innerHTML = `<span class="text-red-500">❌ Lỗi kết nối: ${err.message}</span>`;
+          chatHistory.pop();
+        } finally {
+          setChatLoading(false);
+        }
+      });
+
+      chatInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          chatSendBtn.click();
         }
       });
     </script>
