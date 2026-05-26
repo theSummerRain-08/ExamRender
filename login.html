@@ -9,14 +9,14 @@
   <style>
     body { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
     .card { border-radius: 2rem; }
-    .btn-zalo:active { transform: scale(0.97); }
+    button:active { transform: scale(0.97); }
   </style>
 </head>
 
 <body class="min-h-screen flex flex-col items-center justify-between px-5 py-10"
       style="padding-bottom: max(2.5rem, env(safe-area-inset-bottom))">
 
-  <!-- Top spacer / logo area -->
+  <!-- Logo -->
   <div class="flex flex-col items-center pt-4">
     <img src="/logo.svg" alt="AI Exam Generator" class="w-64 drop-shadow-xl" />
     <h1 class="mt-3 text-3xl font-extrabold text-white tracking-tight">AI Exam Generator</h1>
@@ -28,33 +28,100 @@
   <!-- Card -->
   <div class="card bg-white w-full max-w-sm shadow-2xl p-7 mt-8">
 
-    <!-- Features -->
-    <ul class="space-y-3 mb-8">
-      <li class="flex items-center gap-3">
-        <span class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-base flex-shrink-0">✦</span>
-        <span class="text-slate-700 text-sm font-medium">Sinh đề tự động bằng AI</span>
-      </li>
-      <li class="flex items-center gap-3">
-        <span class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-base flex-shrink-0">📄</span>
-        <span class="text-slate-700 text-sm font-medium">Xuất PDF đẹp chuẩn đề thi</span>
-      </li>
-      <li class="flex items-center gap-3">
-        <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-base flex-shrink-0">💬</span>
-        <span class="text-slate-700 text-sm font-medium">Gửi đề trực tiếp qua Zalo</span>
-      </li>
-    </ul>
+    <!-- Error banner (global) -->
+    <div id="errorBanner" class="hidden mb-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3"></div>
 
-    <!-- Login button -->
-    <button
-      id="loginBtn"
-      class="btn-zalo w-full bg-blue-600 active:bg-blue-700 text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 shadow-lg transition-transform">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48" fill="white">
-        <path d="M24 4C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm8 27H16v-3h7.5L16 19.5V17h16v3h-7.5L32 28.5V31z"/>
-      </svg>
-      Đăng nhập bằng Zalo
-    </button>
+    <!-- ── VIEW 1: Chọn phương thức ── -->
+    <div id="viewChoose">
+      <ul class="space-y-3 mb-7">
+        <li class="flex items-center gap-3">
+          <span class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-base flex-shrink-0">✦</span>
+          <span class="text-slate-700 text-sm font-medium">Sinh đề tự động bằng AI</span>
+        </li>
+        <li class="flex items-center gap-3">
+          <span class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-base flex-shrink-0">📄</span>
+          <span class="text-slate-700 text-sm font-medium">Xuất PDF đẹp chuẩn đề thi</span>
+        </li>
+        <li class="flex items-center gap-3">
+          <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-base flex-shrink-0">💬</span>
+          <span class="text-slate-700 text-sm font-medium">Gửi đề trực tiếp qua Zalo</span>
+        </li>
+      </ul>
 
-    <p class="text-xs text-slate-400 text-center mt-5 leading-relaxed">
+      <p class="text-xs font-semibold text-slate-400 text-center uppercase tracking-widest mb-4">Chọn phương thức đăng nhập</p>
+
+      <!-- Zalo -->
+      <button id="loginZaloBtn"
+        class="w-full bg-blue-600 active:bg-blue-700 text-white py-3.5 rounded-2xl font-bold text-sm flex items-center justify-center gap-3 shadow-md transition-transform mb-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 48 48" fill="white">
+          <path d="M24 4C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm8 27H16v-3h7.5L16 19.5V17h16v3h-7.5L32 28.5V31z"/>
+        </svg>
+        Đăng nhập bằng Zalo
+      </button>
+
+      <!-- SĐT OTP -->
+      <button id="loginPhoneBtn"
+        class="w-full bg-slate-800 active:bg-slate-900 text-white py-3.5 rounded-2xl font-bold text-sm flex items-center justify-center gap-3 shadow-md transition-transform">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18h3"/>
+        </svg>
+        Đăng nhập bằng SĐT
+      </button>
+    </div>
+
+    <!-- ── VIEW 2: Nhập số điện thoại ── -->
+    <div id="viewPhone" class="hidden">
+      <button onclick="showView('choose')" class="flex items-center gap-1 text-sm text-slate-500 mb-5 active:text-slate-700">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
+        </svg>
+        Quay lại
+      </button>
+
+      <p class="text-base font-bold text-slate-800 mb-1">Nhập số điện thoại</p>
+      <p class="text-xs text-slate-500 mb-4">Mã OTP sẽ được gửi qua SMS</p>
+
+      <div class="flex gap-2 mb-3">
+        <span class="flex items-center px-3 rounded-xl border border-slate-300 bg-slate-50 text-sm font-semibold text-slate-600 flex-shrink-0">🇻🇳 +84</span>
+        <input id="phoneInput" type="tel" inputmode="numeric" placeholder="912 345 678"
+          class="flex-1 border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+      </div>
+
+      <button id="sendOtpBtn"
+        class="w-full bg-indigo-600 active:bg-indigo-700 text-white py-4 rounded-2xl font-bold text-sm shadow-md transition-transform">
+        Gửi mã OTP
+      </button>
+      <p id="sendOtpErr" class="hidden text-xs text-red-500 mt-2 text-center"></p>
+    </div>
+
+    <!-- ── VIEW 3: Nhập mã OTP ── -->
+    <div id="viewOtp" class="hidden">
+      <button onclick="showView('phone')" class="flex items-center gap-1 text-sm text-slate-500 mb-5 active:text-slate-700">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
+        </svg>
+        Quay lại
+      </button>
+
+      <p class="text-base font-bold text-slate-800 mb-1">Nhập mã xác nhận</p>
+      <p id="otpSentTo" class="text-xs text-slate-500 mb-5">Mã 6 chữ số đã gửi đến số của bạn</p>
+
+      <input id="otpInput" type="text" inputmode="numeric" maxlength="6" placeholder="• • • • • •"
+        class="w-full border-2 border-slate-300 focus:border-indigo-400 rounded-2xl px-4 py-4 text-center text-3xl tracking-[0.6em] font-mono mb-4 focus:outline-none transition" />
+
+      <button id="verifyOtpBtn"
+        class="w-full bg-indigo-600 active:bg-indigo-700 text-white py-4 rounded-2xl font-bold text-sm shadow-md transition-transform mb-2">
+        Xác nhận
+      </button>
+
+      <button id="resendOtpBtn"
+        class="w-full py-2 text-sm text-slate-500 active:text-slate-700 disabled:opacity-40">
+        Gửi lại mã
+      </button>
+      <p id="verifyOtpErr" class="hidden text-xs text-red-500 mt-1 text-center"></p>
+    </div>
+
+    <p class="text-xs text-slate-400 text-center mt-6 leading-relaxed">
       Bằng cách đăng nhập, bạn đồng ý với điều khoản sử dụng và chính sách bảo mật của chúng tôi
     </p>
   </div>
@@ -65,24 +132,195 @@
   </p>
 
   <script>
-    // Hiển thị lỗi nếu có từ OAuth callback
+    // ── Hiển thị lỗi OAuth từ query param ────────────────────────────────
     const params = new URLSearchParams(location.search);
-    const err = params.get("error");
-    if (err) {
-      const card = document.querySelector(".card");
-      const banner = document.createElement("div");
-      banner.className = "mb-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3";
+    const errCode = params.get("error");
+    if (errCode) {
       const messages = {
-        zalo_state:    "Phiên đăng nhập hết hạn. Vui lòng thử lại.",
+        zalo_state:    "Phiên đăng nhập Zalo hết hạn. Vui lòng thử lại.",
         token_exchange:"Không thể xác thực với Zalo. Vui lòng thử lại.",
+        google_state:  "Phiên đăng nhập Google hết hạn. Vui lòng thử lại.",
+        google_token:  "Không thể xác thực với Google. Vui lòng thử lại.",
+        google_user:   "Không thể lấy thông tin tài khoản Google.",
         missing_params:"Thiếu thông tin xác thực. Vui lòng thử lại.",
       };
-      banner.textContent = messages[err] || "Đã có lỗi xảy ra. Vui lòng thử lại.";
-      card.prepend(banner);
+      const banner = document.getElementById("errorBanner");
+      banner.textContent = messages[errCode] || "Đã có lỗi xảy ra. Vui lòng thử lại.";
+      banner.classList.remove("hidden");
     }
 
-    document.getElementById("loginBtn").addEventListener("click", () => {
+    // ── Chuyển view ───────────────────────────────────────────────────────
+    function showView(view) {
+      ["choose", "phone", "otp"].forEach(v => {
+        const el = document.getElementById("view" + v.charAt(0).toUpperCase() + v.slice(1));
+        el.classList.toggle("hidden", v !== view);
+      });
+      if (view === "phone") {
+        document.getElementById("phoneInput").focus();
+        document.getElementById("sendOtpErr").classList.add("hidden");
+      }
+      if (view === "otp") {
+        document.getElementById("otpInput").focus();
+        document.getElementById("verifyOtpErr").classList.add("hidden");
+      }
+    }
+
+    // ── Đăng nhập Zalo ────────────────────────────────────────────────────
+    document.getElementById("loginZaloBtn").addEventListener("click", () => {
       window.location.href = "/api/auth/zalo";
+    });
+
+    // ── Đăng nhập Google ─────────────────────────────────────────────────
+    document.getElementById("loginGoogleBtn").addEventListener("click", () => {
+      window.location.href = "/api/auth/google";
+    });
+
+    // ── Hiện form SĐT ────────────────────────────────────────────────────
+    document.getElementById("loginPhoneBtn").addEventListener("click", () => {
+      showView("phone");
+    });
+
+    // ── Gửi OTP ──────────────────────────────────────────────────────────
+    let currentPhone = "";
+
+    async function sendOtp(phone) {
+      const res  = await fetch("/api/auth/otp/send", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ phone }),
+      });
+      return res.json();
+    }
+
+    document.getElementById("sendOtpBtn").addEventListener("click", async () => {
+      const phone  = document.getElementById("phoneInput").value.trim();
+      const errEl  = document.getElementById("sendOtpErr");
+      const btn    = document.getElementById("sendOtpBtn");
+
+      if (!phone) {
+        errEl.textContent = "Vui lòng nhập số điện thoại";
+        errEl.classList.remove("hidden");
+        return;
+      }
+
+      btn.disabled    = true;
+      btn.textContent = "Đang gửi...";
+      errEl.classList.add("hidden");
+
+      try {
+        const data = await sendOtp(phone);
+        if (data.error) {
+          errEl.textContent = data.error;
+          errEl.classList.remove("hidden");
+        } else {
+          currentPhone = phone;
+          document.getElementById("otpSentTo").textContent =
+            `Mã 6 chữ số đã gửi đến +84 ${phone.replace(/^0/, "")}`;
+          document.getElementById("otpInput").value = "";
+          showView("otp");
+          startResendCooldown();
+        }
+      } catch (e) {
+        errEl.textContent = "Lỗi kết nối: " + e.message;
+        errEl.classList.remove("hidden");
+      } finally {
+        btn.disabled    = false;
+        btn.textContent = "Gửi mã OTP";
+      }
+    });
+
+    // Enter trong phone input
+    document.getElementById("phoneInput").addEventListener("keydown", e => {
+      if (e.key === "Enter") document.getElementById("sendOtpBtn").click();
+    });
+
+    // ── Xác nhận OTP ─────────────────────────────────────────────────────
+    document.getElementById("verifyOtpBtn").addEventListener("click", async () => {
+      const code  = document.getElementById("otpInput").value.replace(/\D/g, "");
+      const errEl = document.getElementById("verifyOtpErr");
+      const btn   = document.getElementById("verifyOtpBtn");
+
+      if (code.length !== 6) {
+        errEl.textContent = "Vui lòng nhập đủ 6 chữ số";
+        errEl.classList.remove("hidden");
+        return;
+      }
+
+      btn.disabled    = true;
+      btn.textContent = "Đang xác nhận...";
+      errEl.classList.add("hidden");
+
+      try {
+        const res  = await fetch("/api/auth/otp/verify", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ phone: currentPhone, code }),
+        });
+        const data = await res.json();
+
+        if (data.error) {
+          errEl.textContent = data.error;
+          errEl.classList.remove("hidden");
+        } else {
+          window.location.href = "/index.html";
+        }
+      } catch (e) {
+        errEl.textContent = "Lỗi kết nối: " + e.message;
+        errEl.classList.remove("hidden");
+      } finally {
+        btn.disabled    = false;
+        btn.textContent = "Xác nhận";
+      }
+    });
+
+    // Enter trong OTP input
+    document.getElementById("otpInput").addEventListener("keydown", e => {
+      if (e.key === "Enter") document.getElementById("verifyOtpBtn").click();
+    });
+
+    // Chỉ cho nhập số trong OTP input
+    document.getElementById("otpInput").addEventListener("input", e => {
+      e.target.value = e.target.value.replace(/\D/g, "").slice(0, 6);
+    });
+
+    // ── Gửi lại OTP + countdown 60s ──────────────────────────────────────
+    function startResendCooldown() {
+      let secs = 60;
+      const btn = document.getElementById("resendOtpBtn");
+      btn.disabled = true;
+      btn.textContent = `Gửi lại mã (${secs}s)`;
+
+      const interval = setInterval(() => {
+        secs--;
+        btn.textContent = secs > 0 ? `Gửi lại mã (${secs}s)` : "Gửi lại mã";
+        if (secs <= 0) { clearInterval(interval); btn.disabled = false; }
+      }, 1000);
+    }
+
+    document.getElementById("resendOtpBtn").addEventListener("click", async () => {
+      const errEl = document.getElementById("verifyOtpErr");
+      const btn   = document.getElementById("resendOtpBtn");
+      btn.disabled    = true;
+      btn.textContent = "Đang gửi lại...";
+      errEl.classList.add("hidden");
+
+      try {
+        const data = await sendOtp(currentPhone);
+        if (data.error) {
+          errEl.textContent = data.error;
+          errEl.classList.remove("hidden");
+          btn.disabled    = false;
+          btn.textContent = "Gửi lại mã";
+        } else {
+          document.getElementById("otpInput").value = "";
+          startResendCooldown();
+        }
+      } catch (e) {
+        errEl.textContent = "Lỗi kết nối: " + e.message;
+        errEl.classList.remove("hidden");
+        btn.disabled    = false;
+        btn.textContent = "Gửi lại mã";
+      }
     });
   </script>
 </body>
