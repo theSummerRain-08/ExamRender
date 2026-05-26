@@ -3,14 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Đăng nhập - AI Exam Generator</title>
+  <title>Đăng nhập - ThayBot</title>
   <link rel="icon" type="image/avif" href="/Image/graident-ai.avif" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
-    body { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
-    .card { border-radius: 2rem; }
+    * { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { background: #f5f5f7; }
+    button { transition: transform 0.1s; }
     button:active { transform: scale(0.97); }
+    .card { border-radius: 18px; border: 1px solid #e0e0e0; }
+    .btn-primary { background: #0066cc; color: #fff; border-radius: 9999px; font-size: 17px; font-weight: 400; letter-spacing: -0.374px; padding: 14px 22px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .btn-primary:active { background: #0071e3; }
+    .btn-dark { background: #1d1d1f; color: #fff; border-radius: 9999px; font-size: 17px; font-weight: 400; letter-spacing: -0.374px; padding: 14px 22px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .btn-dark:active { background: #333; }
+    input, textarea, select { font-size: 16px; color: #1d1d1f; }
+    input:focus, textarea:focus { outline: none; box-shadow: 0 0 0 3px rgba(0,102,204,0.2); border-color: #0066cc !important; }
   </style>
 </head>
 
@@ -19,48 +27,44 @@
 
   <!-- Logo -->
   <div class="flex flex-col items-center pt-4">
-    <img src="/logo.svg" alt="AI Exam Generator" class="w-64 drop-shadow-xl" />
-    <h1 class="mt-3 text-3xl font-extrabold text-white tracking-tight">AI Exam Generator</h1>
-    <p class="mt-2 text-white/80 text-center text-sm leading-relaxed max-w-xs">
-      Tạo đề thi chuyên nghiệp trong vài giây — gửi thẳng qua Zalo
+    <img src="/Image/ios.png" alt="ThayBot" class="w-20 h-20 rounded-[22px] object-cover" />
+    <h1 class="mt-4 text-[28px] font-semibold text-[#1d1d1f]" style="letter-spacing: -0.374px">ThayBot</h1>
+    <p class="mt-1.5 text-[#7a7a7a] text-center text-sm leading-relaxed max-w-xs">
+      Tạo đề thi chuyên nghiệp trong vài giây
     </p>
   </div>
 
   <!-- Card -->
-  <div class="card bg-white w-full max-w-sm shadow-2xl p-7 mt-8">
+  <div class="card bg-white w-full max-w-sm p-7 mt-8">
 
-    <!-- Error banner (global) -->
+    <!-- Error banner -->
     <div id="errorBanner" class="hidden mb-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3"></div>
 
     <!-- ── VIEW 1: Chọn phương thức ── -->
     <div id="viewChoose">
       <ul class="space-y-3 mb-7">
         <li class="flex items-center gap-3">
-          <span class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-base flex-shrink-0">✦</span>
-          <span class="text-slate-700 text-sm font-medium">Sinh đề tự động bằng AI</span>
+          <span class="w-8 h-8 rounded-full bg-[#f5f5f7] text-[#1d1d1f] flex items-center justify-center text-sm flex-shrink-0">✦</span>
+          <span class="text-[#1d1d1f] text-sm">Sinh đề tự động bằng AI</span>
         </li>
         <li class="flex items-center gap-3">
-          <span class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-base flex-shrink-0"><i class="fa-regular fa-file-pdf"></i></span>
-          <span class="text-slate-700 text-sm font-medium">Xuất PDF đẹp chuẩn đề thi</span>
+          <span class="w-8 h-8 rounded-full bg-[#f5f5f7] text-[#1d1d1f] flex items-center justify-center text-sm flex-shrink-0"><i class="fa-regular fa-file-pdf"></i></span>
+          <span class="text-[#1d1d1f] text-sm">Xuất PDF đẹp chuẩn đề thi</span>
         </li>
         <li class="flex items-center gap-3">
-          <span class="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-base flex-shrink-0"><i class="fa-regular fa-camera"></i></span>
-          <span class="text-slate-700 text-sm font-medium">Tạo đề bằng hình ảnh</span>
+          <span class="w-8 h-8 rounded-full bg-[#f5f5f7] text-[#1d1d1f] flex items-center justify-center text-sm flex-shrink-0"><i class="fa-regular fa-camera"></i></span>
+          <span class="text-[#1d1d1f] text-sm">Tạo đề bằng hình ảnh</span>
         </li>
       </ul>
 
-      <p class="text-xs font-semibold text-slate-400 text-center uppercase tracking-widest mb-4">Chọn phương thức đăng nhập</p>
+      <p class="text-[11px] font-semibold text-[#7a7a7a] text-center uppercase tracking-widest mb-4">Chọn phương thức đăng nhập</p>
 
-      <!-- Zalo -->
-      <button id="loginZaloBtn"
-        class="w-full bg-blue-600 active:bg-blue-700 text-white py-3.5 rounded-2xl font-bold text-sm flex items-center justify-center gap-3 shadow-md transition-transform mb-3">
+      <button id="loginZaloBtn" class="btn-primary mb-3">
         <img src="/Image/logo-zalo-vector-thumbnail.jpg" class="w-6 h-6 rounded object-cover" />
         Đăng nhập bằng Zalo
       </button>
 
-      <!-- SĐT OTP -->
-      <button id="loginPhoneBtn"
-        class="w-full bg-slate-800 active:bg-slate-900 text-white py-3.5 rounded-2xl font-bold text-sm flex items-center justify-center gap-3 shadow-md transition-transform">
+      <button id="loginPhoneBtn" class="btn-dark">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18h3"/>
         </svg>
@@ -70,63 +74,57 @@
 
     <!-- ── VIEW 2: Nhập số điện thoại ── -->
     <div id="viewPhone" class="hidden">
-      <button onclick="showView('choose')" class="flex items-center gap-1 text-sm text-slate-500 mb-5 active:text-slate-700">
+      <button onclick="showView('choose')" class="flex items-center gap-1 text-sm text-[#0066cc] mb-5">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
         </svg>
         Quay lại
       </button>
 
-      <p class="text-base font-bold text-slate-800 mb-1">Nhập số điện thoại</p>
-      <p class="text-xs text-slate-500 mb-4">Mã OTP sẽ được gửi qua SMS</p>
+      <p class="text-[17px] font-semibold text-[#1d1d1f] mb-1" style="letter-spacing: -0.374px">Nhập số điện thoại</p>
+      <p class="text-sm text-[#7a7a7a] mb-4">Mã OTP sẽ được gửi qua SMS</p>
 
       <div class="flex gap-2 mb-3">
-        <span class="flex items-center px-3 rounded-xl border border-slate-300 bg-slate-50 text-sm font-semibold text-slate-600 flex-shrink-0">🇻🇳 +84</span>
+        <span class="flex items-center px-3 rounded-xl border border-[#e0e0e0] bg-[#f5f5f7] text-sm font-semibold text-[#1d1d1f] flex-shrink-0">🇻🇳 +84</span>
         <input id="phoneInput" type="tel" inputmode="numeric" placeholder="912 345 678"
-          class="flex-1 border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+          class="flex-1 border border-[#e0e0e0] rounded-xl px-4 py-3 text-sm bg-white" />
       </div>
 
-      <button id="sendOtpBtn"
-        class="w-full bg-indigo-600 active:bg-indigo-700 text-white py-4 rounded-2xl font-bold text-sm shadow-md transition-transform">
-        Gửi mã OTP
-      </button>
+      <button id="sendOtpBtn" class="btn-primary">Gửi mã OTP</button>
       <p id="sendOtpErr" class="hidden text-xs text-red-500 mt-2 text-center"></p>
     </div>
 
     <!-- ── VIEW 3: Nhập mã OTP ── -->
     <div id="viewOtp" class="hidden">
-      <button onclick="showView('phone')" class="flex items-center gap-1 text-sm text-slate-500 mb-5 active:text-slate-700">
+      <button onclick="showView('phone')" class="flex items-center gap-1 text-sm text-[#0066cc] mb-5">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
         </svg>
         Quay lại
       </button>
 
-      <p class="text-base font-bold text-slate-800 mb-1">Nhập mã xác nhận</p>
-      <p id="otpSentTo" class="text-xs text-slate-500 mb-5">Mã 6 chữ số đã gửi đến số của bạn</p>
+      <p class="text-[17px] font-semibold text-[#1d1d1f] mb-1" style="letter-spacing: -0.374px">Nhập mã xác nhận</p>
+      <p id="otpSentTo" class="text-sm text-[#7a7a7a] mb-5">Mã 6 chữ số đã gửi đến số của bạn</p>
 
       <input id="otpInput" type="text" inputmode="numeric" maxlength="6" placeholder="• • • • • •"
-        class="w-full border-2 border-slate-300 focus:border-indigo-400 rounded-2xl px-4 py-4 text-center text-3xl tracking-[0.6em] font-mono mb-4 focus:outline-none transition" />
+        class="w-full border-2 border-[#e0e0e0] rounded-2xl px-4 py-4 text-center text-3xl tracking-[0.6em] font-mono mb-4 transition" />
 
-      <button id="verifyOtpBtn"
-        class="w-full bg-indigo-600 active:bg-indigo-700 text-white py-4 rounded-2xl font-bold text-sm shadow-md transition-transform mb-2">
-        Xác nhận
-      </button>
+      <button id="verifyOtpBtn" class="btn-primary mb-2">Xác nhận</button>
 
       <button id="resendOtpBtn"
-        class="w-full py-2 text-sm text-slate-500 active:text-slate-700 disabled:opacity-40">
+        class="w-full py-2 text-sm text-[#0066cc] disabled:opacity-40">
         Gửi lại mã
       </button>
       <p id="verifyOtpErr" class="hidden text-xs text-red-500 mt-1 text-center"></p>
     </div>
 
-    <p class="text-xs text-slate-400 text-center mt-6 leading-relaxed">
-      Bằng cách đăng nhập, bạn đồng ý với điều khoản sử dụng và chính sách bảo mật của chúng tôi
+    <p class="text-[12px] text-[#7a7a7a] text-center mt-6 leading-relaxed">
+      Bằng cách đăng nhập, bạn đồng ý với điều khoản sử dụng và chính sách bảo mật
     </p>
   </div>
 
   <!-- Bottom note -->
-  <p class="text-white/50 text-xs text-center mt-6">
+  <p class="text-[#7a7a7a] text-xs text-center mt-6">
     Dành riêng cho giáo viên · Hoàn toàn miễn phí
   </p>
 
@@ -167,11 +165,6 @@
     // ── Đăng nhập Zalo ────────────────────────────────────────────────────
     document.getElementById("loginZaloBtn").addEventListener("click", () => {
       window.location.href = "/api/auth/zalo";
-    });
-
-    // ── Đăng nhập Google ─────────────────────────────────────────────────
-    document.getElementById("loginGoogleBtn").addEventListener("click", () => {
-      window.location.href = "/api/auth/google";
     });
 
     // ── Hiện form SĐT ────────────────────────────────────────────────────

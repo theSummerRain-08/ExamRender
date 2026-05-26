@@ -12,7 +12,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="ThayBot" />
-    <meta name="theme-color" content="#4f46e5" />
+    <meta name="theme-color" content="#0066cc" />
     <link rel="manifest" href="/manifest.json" />
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
@@ -27,24 +27,35 @@
     <style>
       ::-webkit-scrollbar { width: 4px; }
       ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+      input, textarea, select { font-size: 16px; }
 
       html, body { height: 100%; overflow: hidden; }
       .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
       .nav-bar  { padding-bottom: env(safe-area-inset-bottom); }
 
       /* ── Exam document styles ── */
-      .exam-doc { font-family: 'Times New Roman', serif; font-size: 14px; line-height: 1.8; color: #1e293b; }
-      .exam-header { text-align: center; border-bottom: 2px solid #1e293b; padding-bottom: 12px; margin-bottom: 16px; }
-      .exam-header .school { font-size: 12px; font-weight: 600; text-transform: uppercase; margin: 0; }
-      .exam-header .exam-title { font-size: 17px; font-weight: 700; text-transform: uppercase; margin: 6px 0 4px; }
-      .exam-header .exam-meta { font-size: 12px; color: #475569; margin: 0; }
-      .section-title { font-size: 14px; font-weight: 700; text-transform: uppercase; margin: 18px 0 10px; border-left: 4px solid #4f46e5; padding-left: 8px; color: #312e81; }
-      .question { margin-bottom: 14px; }
-      .q-text { margin: 0 0 6px; }
-      .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; padding-left: 12px; }
-      .choice { font-size: 13px; }
-      .answer-key { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 16px; margin-top: 20px; }
-      .answer-key p { margin: 4px 0; font-size: 13px; }
+      .exam-doc { font-family: 'Times New Roman', serif; font-size: 13px; line-height: 1.8; color: #1d1d1f; }
+      .exam-header-wrap { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #1d1d1f; padding-bottom: 10px; margin-bottom: 14px; gap: 12px; }
+      .exam-header-left { text-align: center; min-width: 130px; }
+      .exam-header-right { text-align: center; flex: 1; }
+      .exam-header-left .dept { font-size: 11px; font-weight: 700; text-transform: uppercase; margin: 0 0 2px; }
+      .exam-header-left .school { font-size: 11px; font-weight: 700; text-transform: uppercase; margin: 0; }
+      .exam-header-left .divider { margin: 4px auto; width: 60%; border-top: 1px solid #1d1d1f; }
+      .exam-header-left .page-count { font-size: 10px; font-style: italic; }
+      .exam-header-right .exam-type { font-size: 12px; font-weight: 700; text-transform: uppercase; margin: 0 0 2px; }
+      .exam-header-right .exam-title { font-size: 14px; font-weight: 700; text-transform: uppercase; margin: 4px 0; }
+      .exam-header-right .exam-subject { font-size: 12px; font-weight: 700; text-transform: uppercase; margin: 0 0 2px; }
+      .exam-header-right .exam-time { font-size: 12px; font-style: italic; margin: 0; }
+      .exam-student-row { display: flex; gap: 24px; font-size: 12px; margin-bottom: 14px; border-bottom: 1px dashed #ccc; padding-bottom: 6px; }
+      .section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; margin: 16px 0 4px; }
+      .section-note { font-size: 12px; font-style: italic; margin: 0 0 10px; }
+      .question { margin-bottom: 12px; }
+      .q-text { margin: 0 0 5px; }
+      .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 16px; padding-left: 16px; }
+      .choice { font-size: 12.5px; }
+      .exam-end { text-align: center; font-size: 12px; margin-top: 24px; letter-spacing: 2px; }
+      .answer-key { background: #f5f5f7; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px 14px; margin-top: 18px; }
+      .answer-key p { margin: 3px 0; font-size: 12px; }
 
       /* ── Chat Hỏi đáp styles ── */
       .chat-answer { font-family: 'Times New Roman', serif; font-size: 14px; line-height: 1.8; }
@@ -73,26 +84,23 @@
     </style>
   </head>
 
-  <body class="bg-slate-100 flex flex-col h-full">
+  <body class="bg-[#f5f5f7] flex flex-col h-full" style="font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;">
 
     <!-- ══ HEADER ══════════════════════════════════════════════════════════ -->
-    <header class="bg-white border-b px-4 py-3 flex items-center justify-between shadow-sm flex-shrink-0">
+    <header class="px-4 flex items-center justify-between flex-shrink-0" style="height:44px;background:#0066cc">
       <div class="flex items-center gap-2">
-        <img src="/Image/ios.png" alt="ThayBot" class="w-9 h-9 rounded-xl object-cover shadow" />
-        <div class="leading-tight">
-          <p class="font-bold text-sm text-slate-800">ThayBot</p>
-          <p class="text-xs text-slate-400">Tạo đề thi tự động</p>
-        </div>
+        <img src="/Image/ios.png" alt="ThayBot" class="w-7 h-7 rounded-[8px] object-cover" />
+        <p class="text-[12px] font-semibold text-white" style="letter-spacing:-0.12px">ThayBot</p>
       </div>
 
       <div class="flex items-center gap-2">
-        <div class="h-9 flex items-center gap-2 bg-slate-50 px-3 rounded-xl border">
+        <div class="flex items-center gap-1.5">
           <img id="userAvatar" src="https://i.pravatar.cc/100?img=12" alt="Avatar"
                class="w-6 h-6 rounded-full object-cover" />
-          <p id="userName" class="text-xs font-semibold text-slate-700 max-w-[90px] truncate">Đang tải...</p>
+          <p id="userName" class="text-[12px] text-white/70 max-w-[80px] truncate">Đang tải...</p>
         </div>
         <button id="logoutBtn"
-                class="h-9 text-xs text-red-500 font-semibold px-3 rounded-xl border border-red-200 active:bg-red-50 transition">
+                class="text-[12px] text-white/50 px-2 py-1 rounded-md active:text-white transition" style="letter-spacing:-0.12px">
           Đăng xuất
         </button>
       </div>
@@ -110,10 +118,10 @@
           <!-- Tin nhắn chào AI -->
           <div class="flex gap-2 items-end">
             <img src="/Image/graident-ai.avif" alt="AI" class="w-8 h-8 rounded-xl object-cover flex-shrink-0" />
-            <div class="bg-white rounded-2xl rounded-bl-md px-4 py-3 text-sm shadow-sm border max-w-[85%] leading-relaxed">
+            <div class="bg-white rounded-2xl rounded-bl-md px-4 py-3 text-sm border border-[#e0e0e0] max-w-[85%] leading-relaxed" style="color:#1d1d1f;border-left:3px solid #0066cc">
               Xin chào thầy/cô! 👋<br /><br />
               Hãy mô tả đề thi cần tạo. Ví dụ:<br />
-              <em class="text-indigo-600 not-italic">"Toán 12: 5 câu trắc nghiệm xác suất, 2 câu tích phân, có đáp án, 45 phút"</em>
+              <em class="not-italic" style="color:#0066cc">"Toán 12: 5 câu trắc nghiệm xác suất, 2 câu tích phân, có đáp án, 45 phút"</em>
             </div>
           </div>
 
@@ -126,11 +134,11 @@
               id="promptInput"
               placeholder="Nhập yêu cầu đề thi của thầy/cô..."
               rows="3"
-              class="flex-1 resize-none rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 px-4 py-3 text-sm leading-relaxed bg-slate-50"
+              class="flex-1 resize-none rounded-2xl border border-[#e0e0e0] focus:outline-none focus:ring-2 focus:ring-[#0066cc]/30 focus:border-[#0066cc] px-4 py-3 text-sm leading-relaxed bg-[#f5f5f7]" style="color:#1d1d1f"
             ></textarea>
             <button
               id="generateBtn"
-              class="w-14 h-14 bg-indigo-600 active:bg-indigo-800 text-white rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md transition-transform active:scale-95">
+              class="w-14 h-14 text-white rounded-2xl flex items-center justify-center flex-shrink-0 transition-transform active:scale-95" style="background:#0066cc">
               <svg id="sendIcon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
                    stroke="currentColor" stroke-width="2.2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
@@ -150,20 +158,20 @@
 
         <!-- Preview PDF + Lịch sử -->
         <div class="flex-1 overflow-y-auto p-4 space-y-4">
-          <div id="pdfPreview" class="bg-white rounded-2xl shadow-sm border p-6">
+          <div id="pdfPreview" class="bg-white rounded-[18px] border border-[#e0e0e0] p-6">
             <div class="flex flex-col items-center justify-center py-8 text-center">
-              <div class="text-3xl mb-2 text-slate-400"><i class="fa-regular fa-file-zipper"></i></div>
-              <p class="text-sm font-semibold text-slate-500">Chưa có đề thi nào</p>
-              <p class="text-xs text-slate-400 mt-1">Nhập yêu cầu ở tab "Tạo đề" để xem kết quả</p>
+              <div class="text-3xl mb-2" style="color:#7a7a7a"><i class="fa-regular fa-file-lines"></i></div>
+              <p class="text-sm font-semibold" style="color:#1d1d1f">Chưa có đề thi nào</p>
+              <p class="text-xs mt-1" style="color:#7a7a7a">Nhập yêu cầu ở tab "Tạo đề" để xem kết quả</p>
             </div>
           </div>
 
           <!-- Toolbar tải xuống — chỉ hiện khi có đề -->
           <div id="examToolbar" class="hidden flex gap-2 justify-end -mt-1">
-            <button onclick="downloadAsPdf()" class="flex items-center gap-1.5 text-xs font-semibold bg-slate-50 text-slate-600 border border-slate-200 px-3 py-1.5 rounded-xl active:bg-slate-100 transition-colors">
+            <button onclick="downloadAsPdf()" class="flex items-center gap-1.5 text-xs font-semibold border border-[#e0e0e0] bg-white px-3 py-1.5 rounded-full active:bg-[#f5f5f7] transition-colors" style="color:#1d1d1f;letter-spacing:-0.12px">
               <i class="fa-regular fa-file-pdf"></i> Tải PDF
             </button>
-            <button onclick="downloadAsWord()" class="flex items-center gap-1.5 text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-xl active:bg-blue-100 transition-colors">
+            <button onclick="downloadAsWord()" class="flex items-center gap-1.5 text-xs font-semibold border border-[#0066cc] px-3 py-1.5 rounded-full active:bg-[#e8f0fb] transition-colors" style="color:#0066cc;letter-spacing:-0.12px">
               <i class="fa-regular fa-file-word"></i> Tải Word
             </button>
           </div>
@@ -171,8 +179,8 @@
           <!-- Lịch sử 10 đề gần nhất -->
           <div class="pb-2">
             <div class="flex items-center justify-between mb-3">
-              <p class="text-sm font-semibold text-slate-600">Lịch sử tạo đề</p>
-              <span id="historyCount" class="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">0/10</span>
+              <p class="text-sm font-semibold" style="color:#1d1d1f;letter-spacing:-0.224px">Lịch sử tạo đề</p>
+              <span id="historyCount" class="text-xs px-2 py-0.5 rounded-full border border-[#e0e0e0]" style="color:#7a7a7a">0/10</span>
             </div>
             <div id="historyList">
               <p class="text-center text-xs text-slate-400 py-4">Chưa có đề nào được tạo</p>
@@ -192,9 +200,9 @@
           <!-- Tin nhắn chào -->
           <div class="flex gap-2 items-end">
             <img src="/Image/graident-ai.avif" alt="AI" class="w-8 h-8 rounded-xl object-cover flex-shrink-0" />
-            <div class="bg-white rounded-2xl rounded-bl-md px-4 py-3 text-sm shadow-sm border max-w-[85%] leading-relaxed">
+            <div class="bg-white rounded-2xl rounded-bl-md px-4 py-3 text-sm border border-[#e0e0e0] max-w-[85%] leading-relaxed" style="color:#1d1d1f;border-left:3px solid #0066cc">
               Xin chào! 👋 Tôi có thể giải đáp các câu hỏi về toán học.<br/><br/>
-              Ví dụ: <em class="text-violet-600 not-italic">"Giải phương trình bậc 2 có delta bằng 0"</em> hoặc <em class="text-violet-600 not-italic">"Công thức tính thể tích hình chóp?"</em>
+              Ví dụ: <em class="not-italic" style="color:#0066cc">"Giải phương trình bậc 2 có delta bằng 0"</em> hoặc <em class="not-italic" style="color:#0066cc">"Công thức tính thể tích hình chóp?"</em>
             </div>
           </div>
 
@@ -207,11 +215,11 @@
               id="chatInput"
               placeholder="Hỏi bất kỳ câu hỏi toán nào..."
               rows="2"
-              class="flex-1 resize-none rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-400 px-4 py-3 text-sm leading-relaxed bg-slate-50"
+              class="flex-1 resize-none rounded-2xl border border-[#e0e0e0] focus:outline-none focus:ring-2 focus:ring-[#0066cc]/30 focus:border-[#0066cc] px-4 py-3 text-sm leading-relaxed bg-[#f5f5f7]" style="color:#1d1d1f"
             ></textarea>
             <button
               id="chatSendBtn"
-              class="w-14 h-14 bg-violet-600 active:bg-violet-800 text-white rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md transition-transform active:scale-95">
+              class="w-14 h-14 text-white rounded-2xl flex items-center justify-center flex-shrink-0 transition-transform active:scale-95" style="background:#0066cc">
               <svg id="chatSendIcon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
                    stroke="currentColor" stroke-width="2.2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
@@ -243,7 +251,7 @@
 
         <div class="bg-white border-t px-4 py-3 pb-safe flex-shrink-0 shadow-[0_-2px_8px_rgba(0,0,0,0.06)]">
           <button id="scanGenerateBtn" disabled
-            class="w-full py-4 rounded-2xl bg-amber-500 active:bg-amber-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md transition disabled:opacity-40">
+            class="w-full py-4 rounded-full text-white font-semibold text-sm flex items-center justify-center gap-2 transition active:scale-95 disabled:opacity-40" style="background:#0066cc;letter-spacing:-0.374px">
             <svg id="scanSendIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.966 8.966 0 00-6 2.292m0-14.25v14.25"/>
             </svg>
@@ -264,7 +272,7 @@
     <nav class="nav-bar bg-white border-t flex flex-shrink-0">
 
       <button id="btnTabCreate" onclick="switchTab('create')"
-              class="flex-1 flex flex-col items-center justify-center py-3 gap-1 text-indigo-600 border-t-2 border-indigo-600 transition">
+              class="flex-1 flex flex-col items-center justify-center py-3 gap-1 border-t-2 border-[#0066cc] transition" style="color:#0066cc">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
              stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round"
@@ -635,17 +643,14 @@
       // ── Tab switching ────────────────────────────────────────────────────
       function switchTab(tab) {
         const tabs = ['create', 'scan', 'result', 'chat'];
-        const colors = { create: 'indigo', scan: 'amber', result: 'indigo', chat: 'violet' };
-
         tabs.forEach(t => {
           document.getElementById(`tab${t.charAt(0).toUpperCase()+t.slice(1)}`).classList.toggle('hidden', t !== tab);
           const btn = document.getElementById(`btnTab${t.charAt(0).toUpperCase()+t.slice(1)}`);
           if (!btn) return;
           const active = t === tab;
-          const color  = colors[tab];
-          btn.className = `flex-1 flex flex-col items-center justify-center py-3 gap-1 transition ${
-            active ? `text-${color}-600 border-t-2 border-${color}-600` : 'text-slate-400 border-t-2 border-transparent'
-          }`;
+          btn.className = `flex-1 flex flex-col items-center justify-center py-3 gap-1 border-t-2 transition`;
+          btn.style.color       = active ? '#0066cc' : '#7a7a7a';
+          btn.style.borderColor = active ? '#0066cc' : 'transparent';
         });
       }
 
@@ -660,13 +665,13 @@
 
         if (isUser) {
           wrapper.innerHTML = `
-            <div class="bg-indigo-600 text-white rounded-2xl rounded-tr-md px-4 py-3 text-sm max-w-[85%] leading-relaxed shadow-sm">
+            <div class="text-white rounded-2xl rounded-tr-md px-4 py-3 text-sm max-w-[85%] leading-relaxed" style="background:#0066cc">
               ${html}
             </div>`;
         } else {
           wrapper.innerHTML = `
             <img src="/Image/graident-ai.avif" alt="AI" class="w-8 h-8 rounded-xl object-cover flex-shrink-0" />
-            <div class="bg-white rounded-2xl rounded-bl-md px-4 py-3 text-sm shadow-sm border max-w-[85%] leading-relaxed">
+            <div class="bg-white rounded-2xl rounded-bl-md px-4 py-3 text-sm border border-[#e0e0e0] max-w-[85%] leading-relaxed" style="border-left:3px solid #0066cc;color:#1d1d1f">
               ${html}
             </div>`;
         }
@@ -699,17 +704,21 @@
           .trim().replace(/\s+/g, "-") || "de-thi";
 
         const examCss = `
-          body { font-family: 'Times New Roman', serif; font-size: 14pt; line-height: 1.8; color: #1e293b; margin: 2cm; }
-          .exam-header { text-align: center; border-bottom: 2px solid #1e293b; padding-bottom: 12px; margin-bottom: 16px; }
-          .exam-header .school { font-size: 11pt; font-weight: 600; text-transform: uppercase; }
-          .exam-header .exam-title { font-size: 15pt; font-weight: 700; text-transform: uppercase; margin: 6px 0 4px; }
-          .exam-header .exam-meta { font-size: 11pt; color: #475569; }
-          .section-title { font-size: 13pt; font-weight: 700; text-transform: uppercase; margin: 18px 0 10px; }
-          .question { margin-bottom: 14px; }
-          .q-text { margin: 0 0 6px; }
-          .choices { display: table; width: 100%; }
-          .choice { display: inline-block; width: 48%; font-size: 12pt; padding: 2px 6px; }
-          .answer-key { border: 1px solid #e2e8f0; padding: 12px 16px; margin-top: 20px; }
+          body { font-family: 'Times New Roman', serif; font-size: 13pt; line-height: 1.8; color: #1d1d1f; margin: 2cm; }
+          .exam-header-wrap { display: flex; justify-content: space-between; border-bottom: 2px solid #1d1d1f; padding-bottom: 10px; margin-bottom: 12px; gap: 16px; }
+          .exam-header-left, .exam-header-right { text-align: center; }
+          .exam-header-left .dept, .exam-header-left .school { font-size: 11pt; font-weight: 700; text-transform: uppercase; margin: 0; }
+          .exam-header-right .exam-type, .exam-header-right .exam-title { font-size: 12pt; font-weight: 700; text-transform: uppercase; margin: 2px 0; }
+          .exam-header-right .exam-time { font-size: 11pt; font-style: italic; }
+          .exam-student-row { display: flex; gap: 20px; font-size: 11pt; margin-bottom: 12px; }
+          .section-title { font-size: 12pt; font-weight: 700; text-transform: uppercase; margin: 16px 0 4px; }
+          .section-note { font-size: 11pt; font-style: italic; margin: 0 0 10px; }
+          .question { margin-bottom: 12px; }
+          .q-text { margin: 0 0 4px; }
+          .choices { display: flex; flex-wrap: wrap; padding-left: 16px; }
+          .choice { width: 50%; font-size: 12pt; padding: 1px 0; }
+          .exam-end { text-align: center; font-size: 11pt; margin-top: 20px; letter-spacing: 2px; }
+          .answer-key { border: 1px solid #e0e0e0; padding: 10px 14px; margin-top: 16px; }
         `;
 
         const fullHtml = `<!DOCTYPE html>
@@ -773,9 +782,9 @@
         const aiMsgWrapper = addMessage(`
           Đang tạo đề thi... ✦
           <span class="inline-flex gap-1 ml-1">
-            <span class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce inline-block"></span>
-            <span class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce inline-block [animation-delay:0.15s]"></span>
-            <span class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce inline-block [animation-delay:0.3s]"></span>
+            <span class="w-1.5 h-1.5 rounded-full animate-bounce inline-block" style="background:#0066cc"></span>
+            <span class="w-1.5 h-1.5 rounded-full animate-bounce inline-block [animation-delay:0.15s]" style="background:#0066cc"></span>
+            <span class="w-1.5 h-1.5 rounded-full animate-bounce inline-block [animation-delay:0.3s]" style="background:#0066cc"></span>
           </span>
         `);
         const aiMsgBubble = aiMsgWrapper.querySelector("div:last-child");
@@ -798,7 +807,7 @@
             currentShareId   = null; // reset link cũ
 
             // Cập nhật tin nhắn chat
-            aiMsgBubble.innerHTML = `✅ Đề thi đã được tạo! <button onclick="switchTab('result')" class="ml-2 text-indigo-600 font-semibold underline">Xem kết quả →</button>`;
+            aiMsgBubble.innerHTML = `✅ Đề thi đã được tạo! <button onclick="switchTab('result')" class="ml-2 font-semibold underline" style="color:#0066cc">Xem kết quả →</button>`;
 
             // Hiển thị đề thi trong tab Kết quả
             pdfPreview.innerHTML = data.html;
@@ -845,13 +854,13 @@
 
         if (isUser) {
           wrapper.innerHTML = `
-            <div class="bg-violet-600 text-white rounded-2xl rounded-tr-md px-4 py-3 text-sm max-w-[85%] leading-relaxed shadow-sm">
+            <div class="text-white rounded-2xl rounded-tr-md px-4 py-3 text-sm max-w-[85%] leading-relaxed" style="background:#0066cc">
               ${html}
             </div>`;
         } else {
           wrapper.innerHTML = `
             <img src="/Image/graident-ai.avif" alt="AI" class="w-8 h-8 rounded-xl object-cover flex-shrink-0 mt-1" />
-            <div class="bg-white rounded-2xl rounded-bl-md px-4 py-3 text-sm shadow-sm border max-w-[85%] chat-answer">
+            <div class="bg-white rounded-2xl rounded-bl-md px-4 py-3 text-sm border border-[#e0e0e0] max-w-[85%] chat-answer" style="border-left:3px solid #0066cc;color:#1d1d1f">
               ${html}
             </div>`;
         }
@@ -878,9 +887,9 @@
         // Typing indicator
         const typingWrapper = addChatMessage(`
           <span class="flex gap-1 items-center h-5">
-            <span class="typing-dot w-2 h-2 bg-violet-400 rounded-full inline-block"></span>
-            <span class="typing-dot w-2 h-2 bg-violet-400 rounded-full inline-block"></span>
-            <span class="typing-dot w-2 h-2 bg-violet-400 rounded-full inline-block"></span>
+            <span class="typing-dot w-2 h-2 rounded-full inline-block" style="background:#0066cc"></span>
+            <span class="typing-dot w-2 h-2 rounded-full inline-block" style="background:#0066cc"></span>
+            <span class="typing-dot w-2 h-2 rounded-full inline-block" style="background:#0066cc"></span>
           </span>
         `);
         const typingBubble = typingWrapper.querySelector("div:last-child");
@@ -952,7 +961,7 @@
               class="absolute top-1.5 right-1.5 w-6 h-6 bg-black bg-opacity-60 text-white rounded-full text-xs flex items-center justify-center font-bold leading-none">✕</button>
             <span class="absolute bottom-1.5 left-2 text-white text-[10px] font-bold bg-black bg-opacity-40 px-1.5 py-0.5 rounded-full">Trang ${slot+1}</span>`;
         } else {
-          el.className = "aspect-[3/4] rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 flex flex-col items-center justify-center gap-2 cursor-pointer active:bg-slate-100 transition overflow-hidden relative";
+          el.className = "aspect-[3/4] rounded-2xl border-2 border-dashed border-[#e0e0e0] bg-white flex flex-col items-center justify-center gap-2 cursor-pointer active:bg-[#f5f5f7] transition overflow-hidden relative";
           el.onclick = () => triggerCapture(slot);
           el.innerHTML = `
             <input id="scanInput${slot}" type="file" accept="image/*" capture="environment" class="hidden" onchange="handleCapture(${slot}, this)" />
@@ -1115,10 +1124,10 @@
         titleEl.outerHTML = `
           <div class="flex gap-1 items-center flex-1 min-w-0" id="renameGroup_${id}" onclick="event.stopPropagation()">
             <input id="renameInput_${id}"
-              class="flex-1 min-w-0 text-sm border border-indigo-300 rounded-lg px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+              class="flex-1 min-w-0 text-sm rounded-lg px-2 py-0.5 focus:outline-none" style="border:1px solid #0066cc;color:#1d1d1f"
               value="${escapeHtml(item.title)}" />
             <button onclick="confirmRename('${id}')"
-              class="w-6 h-6 rounded-lg bg-indigo-500 text-white text-xs flex items-center justify-center flex-shrink-0">✓</button>
+              class="w-6 h-6 rounded-lg text-white text-xs flex items-center justify-center flex-shrink-0" style="background:#0066cc">✓</button>
           </div>`;
         const input = document.getElementById(`renameInput_${id}`);
         input.focus(); input.select();
@@ -1157,18 +1166,18 @@
             + " " + d.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
           const isHW    = item.type === "homework";
           const typeTag = isHW
-            ? `<span class="text-amber-500 font-semibold">Chụp sách</span>`
-            : `<span class="text-indigo-500 font-semibold">Tạo đề</span>`;
+            ? `<span class="font-semibold" style="color:#7a7a7a">Chụp sách</span>`
+            : `<span class="font-semibold" style="color:#0066cc">Tạo đề</span>`;
 
           return `
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm px-4 py-3 flex items-center gap-3 mb-2">
+            <div class="bg-white rounded-[18px] border border-[#e0e0e0] px-4 py-3 flex items-center gap-3 mb-2">
               <div class="flex-1 min-w-0 cursor-pointer" onclick="openHistoryItem('${item.id}')">
-                <p class="text-sm font-semibold text-slate-700 truncate" id="histTitle_${item.id}">${escapeHtml(item.title)}</p>
-                <p class="text-xs text-slate-400 mt-0.5">${typeTag} · ${dateStr}</p>
+                <p class="text-sm font-semibold truncate" id="histTitle_${item.id}" style="color:#1d1d1f;letter-spacing:-0.224px">${escapeHtml(item.title)}</p>
+                <p class="text-xs mt-0.5" style="color:#7a7a7a">${typeTag} · ${dateStr}</p>
               </div>
               <div class="flex gap-1.5 flex-shrink-0">
                 <button onclick="startRenameHistory('${item.id}')"
-                  class="w-8 h-8 rounded-xl bg-slate-100 active:bg-slate-200 flex items-center justify-center transition text-slate-500" title="Đổi tên">
+                  class="w-8 h-8 rounded-xl bg-[#f5f5f7] active:bg-[#e0e0e0] flex items-center justify-center transition" style="color:#7a7a7a" title="Đổi tên">
                   <i class="fa-solid fa-pencil text-xs"></i></button>
                 <button onclick="deleteHistoryItem('${item.id}')"
                   class="w-8 h-8 rounded-xl bg-red-50 active:bg-red-100 flex items-center justify-center transition text-red-400" title="Xóa">

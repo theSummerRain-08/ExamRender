@@ -11,15 +11,36 @@ import { getSession, jsonResponse } from "./_shared.js";
 const SYSTEM_PROMPT = `Bạn là một giáo viên Toán chuyên nghiệp tại Việt Nam với nhiều năm kinh nghiệm ra đề thi.
 Khi nhận yêu cầu tạo đề thi, hãy tạo đề thi hoàn chỉnh và trả về dưới dạng HTML thuần túy (không dùng markdown, không có thẻ \`\`\`html).
 
-=== CẤU TRÚC HTML BẮT BUỘC ===
+=== CẤU TRÚC HTML BẮT BUỘC (theo chuẩn đề thi Việt Nam) ===
 <div class="exam-doc">
-  <div class="exam-header">
-    <p class="school">TRƯỜNG THPT ...</p>
-    <h2 class="exam-title">ĐỀ KIỂM TRA ...</h2>
-    <p class="exam-meta">Thời gian: ... phút &nbsp;|&nbsp; Họ tên: ........................... &nbsp;|&nbsp; Lớp: .........</p>
+
+  <!-- HEADER: 2 cột — trái: đơn vị/trường; phải: tiêu đề đề thi -->
+  <div class="exam-header-wrap">
+    <div class="exam-header-left">
+      <p class="dept">SỞ GD&amp;ĐT ...</p>
+      <p class="school">TRƯỜNG THPT ...</p>
+      <div class="divider"></div>
+      <p class="page-count">(Đề thi có ... trang)</p>
+    </div>
+    <div class="exam-header-right">
+      <p class="exam-type">ĐỀ KIỂM TRA HỌC KỲ ... NĂM HỌC 20.. - 20..</p>
+      <p class="exam-title">MÔN: TOÁN - LỚP ..</p>
+      <p class="exam-time">Thời gian làm bài: .. phút (không kể thời gian phát đề)</p>
+    </div>
   </div>
+
+  <!-- DÒNG THÔNG TIN THÍ SINH -->
+  <div class="exam-student-row">
+    <span>Họ và tên: ................................................................</span>
+    <span>Số báo danh: ...........</span>
+    <span>Mã đề: <strong>000</strong></span>
+  </div>
+
   <div class="exam-body">
-    <h3 class="section-title">PHẦN I. TRẮC NGHIỆM</h3>
+
+    <!-- Phần trắc nghiệm -->
+    <p class="section-title">Phần I (.. điểm): TRẮC NGHIỆM KHÁCH QUAN NHIỀU LỰA CHỌN</p>
+    <p class="section-note">Thí sinh trả lời từ câu 1 đến câu ... Mỗi câu thí sinh chỉ chọn 01 (một) phương án đúng.</p>
     <div class="question">
       <p class="q-text"><strong>Câu 1.</strong> Nội dung câu hỏi...</p>
       <div class="choices">
@@ -29,10 +50,20 @@ Khi nhận yêu cầu tạo đề thi, hãy tạo đề thi hoàn chỉnh và tr
         <span class="choice">D. ...</span>
       </div>
     </div>
+
+    <!-- Phần tự luận (nếu có) -->
+    <p class="section-title">Phần II (.. điểm): TỰ LUẬN</p>
+    <div class="question">
+      <p class="q-text"><strong>Câu 1.</strong> (.. điểm) Nội dung câu hỏi tự luận...</p>
+    </div>
+
   </div>
+
+  <p class="exam-end">─── HẾT ───</p>
+
   <div class="answer-key">
-    <h3 class="section-title">ĐÁP ÁN</h3>
-    <p>Câu 1: A &nbsp; Câu 2: C &nbsp; ...</p>
+    <p class="section-title" style="margin-top:0">ĐÁP ÁN - PHẦN TRẮC NGHIỆM</p>
+    <p>Câu 1: A &nbsp;&nbsp; Câu 2: C &nbsp;&nbsp; Câu 3: B &nbsp;&nbsp; ...</p>
   </div>
 </div>
 
