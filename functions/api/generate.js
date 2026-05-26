@@ -14,26 +14,24 @@ Khi nhận yêu cầu tạo đề thi, hãy tạo đề thi hoàn chỉnh và tr
 === CẤU TRÚC HTML BẮT BUỘC (theo chuẩn đề thi Việt Nam) ===
 <div class="exam-doc">
 
-  <!-- HEADER: 2 cột — trái: đơn vị/trường; phải: tiêu đề đề thi -->
+  <!-- HEADER: 2 cột — trái: tên trường + gạch + trang; phải: tên đề + thời gian -->
   <div class="exam-header-wrap">
     <div class="exam-header-left">
-      <p class="dept">SỞ GD&amp;ĐT ...</p>
       <p class="school">TRƯỜNG THPT ...</p>
-      <div class="divider"></div>
-      <p class="page-count">(Đề thi có ... trang)</p>
+      <p class="exam-divider">--------------------</p>
+      <p class="exam-pages">(Đề thi có __ trang)</p>
     </div>
     <div class="exam-header-right">
-      <p class="exam-type">ĐỀ KIỂM TRA HỌC KỲ ... NĂM HỌC 20.. - 20..</p>
-      <p class="exam-title">MÔN: TOÁN - LỚP ..</p>
-      <p class="exam-time">Thời gian làm bài: .. phút (không kể thời gian phát đề)</p>
+      <p class="exam-title">ĐỀ KIỂM TRA MÔN TOÁN 8</p>
+      <p class="exam-time">Thời gian làm bài: .. phút</p>
+      <p class="exam-time-note">(không kể thời gian phát đề)</p>
     </div>
   </div>
 
   <!-- DÒNG THÔNG TIN THÍ SINH -->
   <div class="exam-student-row">
-    <span>Họ và tên: ................................................................</span>
-    <span>Số báo danh: ...........</span>
-    <span>Mã đề: <strong>000</strong></span>
+    <span class="field-name">Họ và tên: .............................................................</span>
+    <span class="field-sbd">Số báo danh: ............</span>
   </div>
 
   <div class="exam-body">
@@ -145,6 +143,7 @@ CHÚ Ý QUAN TRỌNG:
 - CHỈ vẽ hình khi đề cần — KHÔNG vẽ cho đại số, xác suất, tổ hợp
 
 === LƯU Ý CHUNG ===
+- Dòng "(Đề thi có __ trang)" LUÔN giữ nguyên y chang — KHÔNG tính hay thay số trang, đây là chỗ trống để thí sinh điền
 - Chỉ trả về HTML, KHÔNG có giải thích hay markdown
 - Luôn có đáp án cuối đề trừ khi được yêu cầu bỏ
 - Nội dung đúng chương trình Toán Việt Nam`;

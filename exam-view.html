@@ -12,19 +12,29 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
           onload="katexReady = true; tryRenderMath();"></script>
   <style>
-    /* ── Exam document styles ── */
-    .exam-doc { font-family: "Times New Roman", serif; font-size: 14px; line-height: 1.7; color: #111; }
-    .exam-header { text-align: center; margin-bottom: 1rem; }
-    .exam-header .school { font-weight: bold; font-size: 13px; text-transform: uppercase; margin: 0; }
-    .exam-header .exam-title { font-size: 18px; font-weight: bold; margin: 6px 0 4px; text-transform: uppercase; }
-    .exam-header .exam-meta { font-size: 13px; color: #444; margin: 0; }
-    .section-title { font-weight: bold; font-size: 14px; text-transform: uppercase; margin: 1.2rem 0 0.5rem; border-bottom: 1px solid #ccc; padding-bottom: 3px; }
-    .question { margin-bottom: 1rem; }
-    .q-text { margin: 0 0 6px; }
-    .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; padding-left: 1rem; }
-    .choice { font-size: 14px; }
-    .answer-key { margin-top: 1.5rem; padding-top: 0.75rem; border-top: 2px solid #333; }
-    .answer-key p { margin: 0; line-height: 2; }
+    /* ── Exam document styles — must stay in sync with index.html ── */
+    .exam-doc { font-family: 'Times New Roman', serif; font-size: 13px; line-height: 1.8; color: #1d1d1f; }
+    .exam-header-wrap { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #1d1d1f; padding-bottom: 10px; margin-bottom: 14px; gap: 12px; }
+    .exam-header-left { text-align: center; }
+    .exam-header-right { text-align: center; flex: 1; }
+    .exam-header-left .school { font-size: 12px; font-weight: 700; text-transform: uppercase; margin: 0 0 2px; }
+    .exam-header-left .exam-divider { font-size: 11px; letter-spacing: 1px; margin: 2px 0; }
+    .exam-header-left .exam-pages { font-size: 12px; font-style: italic; margin: 0; }
+    .exam-header-right .exam-title { font-size: 14px; font-weight: 700; text-transform: uppercase; margin: 0 0 3px; }
+    .exam-header-right .exam-time { font-size: 12px; margin: 0 0 1px; }
+    .exam-header-right .exam-time-note { font-size: 12px; font-style: italic; margin: 0; }
+    .exam-student-row { display: flex; font-size: 12px; margin-bottom: 14px; border-bottom: 1px dashed #ccc; padding-bottom: 6px; }
+    .exam-student-row .field-name { flex: 1; }
+    .exam-student-row .field-sbd { flex-shrink: 0; }
+    .section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; margin: 16px 0 4px; }
+    .section-note { font-size: 12px; font-style: italic; margin: 0 0 10px; }
+    .question { margin-bottom: 12px; }
+    .q-text { margin: 0 0 5px; }
+    .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 16px; padding-left: 16px; }
+    .choice { font-size: 12.5px; }
+    .exam-end { text-align: center; font-size: 12px; margin-top: 24px; letter-spacing: 2px; }
+    .answer-key { background: #f5f5f7; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px 14px; margin-top: 18px; }
+    .answer-key p { margin: 3px 0; font-size: 12px; }
 
     /* ── Print styles ── */
     @media print {
@@ -36,48 +46,43 @@
     }
   </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="min-h-screen" style="background:#f5f5f7;font-family:system-ui,-apple-system,sans-serif">
 
   <!-- Top bar -->
-  <div class="no-print sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shadow-sm">
+  <div class="no-print sticky top-0 z-10 flex items-center justify-between px-4 flex-shrink-0" style="height:44px;background:#0066cc">
     <div class="flex items-center gap-2">
-      <img src="/logo.svg" alt="Logo" class="w-8 h-8" />
-      <span class="font-semibold text-gray-800 text-sm" id="examTitle">Đề thi</span>
+      <img src="/Image/ios.png" alt="ThayBot" class="w-7 h-7 rounded-[8px] object-cover" />
+      <span class="text-white text-[12px] font-semibold truncate max-w-[160px]" id="examTitle" style="letter-spacing:-0.12px">Đề thi</span>
     </div>
-    <div class="flex gap-2">
-      <button
-        onclick="window.print()"
-        class="flex items-center gap-1.5 bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-xl shadow active:scale-95 transition-transform">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
-        </svg>
-        Tải PDF
-      </button>
-    </div>
+    <button onclick="window.print()"
+      class="text-white text-[12px] font-semibold px-3 py-1.5 rounded-full active:opacity-70 transition"
+      style="background:rgba(255,255,255,0.2);letter-spacing:-0.12px">
+      Tải PDF
+    </button>
   </div>
 
   <!-- Loading state -->
   <div id="loadingState" class="flex flex-col items-center justify-center py-24 gap-4">
-    <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-    <p class="text-gray-500 text-sm">Đang tải đề thi...</p>
+    <div class="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin" style="border-color:#e0e0e0;border-top-color:#0066cc"></div>
+    <p class="text-sm" style="color:#7a7a7a">Đang tải đề thi...</p>
   </div>
 
   <!-- Error state -->
   <div id="errorState" class="hidden flex flex-col items-center justify-center py-24 gap-4 px-6">
     <div class="text-5xl">📭</div>
-    <p class="text-gray-700 font-semibold text-center" id="errorMsg">Không tìm thấy đề thi</p>
-    <p class="text-gray-400 text-sm text-center">Link có thể đã hết hạn (7 ngày) hoặc không tồn tại.</p>
-    <a href="/login.html" class="mt-2 text-indigo-600 text-sm font-medium underline">← Về trang chủ</a>
+    <p class="text-sm font-semibold text-center" style="color:#1d1d1f" id="errorMsg">Không tìm thấy đề thi</p>
+    <p class="text-xs text-center" style="color:#7a7a7a">Link có thể đã hết hạn (7 ngày) hoặc không tồn tại.</p>
+    <a href="/index.html" class="mt-2 text-sm font-medium" style="color:#0066cc">← Về trang chủ</a>
   </div>
 
   <!-- Exam content -->
-  <div id="examContent" class="hidden max-w-2xl mx-auto my-6 bg-white rounded-2xl shadow p-6 px-5">
+  <div id="examContent" class="hidden max-w-2xl mx-auto my-6 bg-white rounded-[18px] border border-[#e0e0e0] p-6">
     <div id="examBody"></div>
   </div>
 
   <!-- Author / meta footer -->
-  <div id="examMeta" class="no-print hidden text-center pb-8 text-xs text-gray-400 mt-2">
-    <p id="metaText"></p>
+  <div id="examMeta" class="no-print hidden text-center pb-8 mt-2">
+    <p id="metaText" class="text-xs" style="color:#7a7a7a"></p>
   </div>
 
   <script>

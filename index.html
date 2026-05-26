@@ -36,17 +36,17 @@
       /* ── Exam document styles ── */
       .exam-doc { font-family: 'Times New Roman', serif; font-size: 13px; line-height: 1.8; color: #1d1d1f; }
       .exam-header-wrap { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #1d1d1f; padding-bottom: 10px; margin-bottom: 14px; gap: 12px; }
-      .exam-header-left { text-align: center; min-width: 130px; }
+      .exam-header-left { text-align: center; }
       .exam-header-right { text-align: center; flex: 1; }
-      .exam-header-left .dept { font-size: 11px; font-weight: 700; text-transform: uppercase; margin: 0 0 2px; }
-      .exam-header-left .school { font-size: 11px; font-weight: 700; text-transform: uppercase; margin: 0; }
-      .exam-header-left .divider { margin: 4px auto; width: 60%; border-top: 1px solid #1d1d1f; }
-      .exam-header-left .page-count { font-size: 10px; font-style: italic; }
-      .exam-header-right .exam-type { font-size: 12px; font-weight: 700; text-transform: uppercase; margin: 0 0 2px; }
-      .exam-header-right .exam-title { font-size: 14px; font-weight: 700; text-transform: uppercase; margin: 4px 0; }
-      .exam-header-right .exam-subject { font-size: 12px; font-weight: 700; text-transform: uppercase; margin: 0 0 2px; }
-      .exam-header-right .exam-time { font-size: 12px; font-style: italic; margin: 0; }
-      .exam-student-row { display: flex; gap: 24px; font-size: 12px; margin-bottom: 14px; border-bottom: 1px dashed #ccc; padding-bottom: 6px; }
+      .exam-header-left .school { font-size: 12px; font-weight: 700; text-transform: uppercase; margin: 0 0 2px; }
+      .exam-header-left .exam-divider { font-size: 11px; letter-spacing: 1px; margin: 2px 0; }
+      .exam-header-left .exam-pages { font-size: 12px; font-style: italic; margin: 0; }
+      .exam-header-right .exam-title { font-size: 14px; font-weight: 700; text-transform: uppercase; margin: 0 0 3px; }
+      .exam-header-right .exam-time { font-size: 12px; margin: 0 0 1px; }
+      .exam-header-right .exam-time-note { font-size: 12px; font-style: italic; margin: 0; }
+      .exam-student-row { display: flex; font-size: 12px; margin-bottom: 14px; border-bottom: 1px dashed #ccc; padding-bottom: 6px; }
+      .exam-student-row .field-name { flex: 1; }
+      .exam-student-row .field-sbd { flex-shrink: 0; }
       .section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; margin: 16px 0 4px; }
       .section-note { font-size: 12px; font-style: italic; margin: 0 0 10px; }
       .question { margin-bottom: 12px; }
@@ -164,16 +164,6 @@
               <p class="text-sm font-semibold" style="color:#1d1d1f">Chưa có đề thi nào</p>
               <p class="text-xs mt-1" style="color:#7a7a7a">Nhập yêu cầu ở tab "Tạo đề" để xem kết quả</p>
             </div>
-          </div>
-
-          <!-- Toolbar tải xuống — chỉ hiện khi có đề -->
-          <div id="examToolbar" class="hidden flex gap-2 justify-end -mt-1">
-            <button onclick="downloadAsPdf()" class="flex items-center gap-1.5 text-xs font-semibold border border-[#e0e0e0] bg-white px-3 py-1.5 rounded-full active:bg-[#f5f5f7] transition-colors" style="color:#1d1d1f;letter-spacing:-0.12px">
-              <i class="fa-regular fa-file-pdf"></i> Tải PDF
-            </button>
-            <button onclick="downloadAsWord()" class="flex items-center gap-1.5 text-xs font-semibold border border-[#0066cc] px-3 py-1.5 rounded-full active:bg-[#e8f0fb] transition-colors" style="color:#0066cc;letter-spacing:-0.12px">
-              <i class="fa-regular fa-file-word"></i> Tải Word
-            </button>
           </div>
 
           <!-- Lịch sử 10 đề gần nhất -->
@@ -813,7 +803,6 @@
             pdfPreview.innerHTML = data.html;
             renderMath(pdfPreview);
             renderGeoGebraFigures(pdfPreview); // async — không cần await
-            document.getElementById("examToolbar").classList.remove("hidden");
 
             // Tự động chuyển tab
             switchTab("result");
@@ -1057,7 +1046,6 @@
             pdfPreview.innerHTML = data.html;
             renderMath(pdfPreview);
             renderGeoGebraFigures(pdfPreview);
-            document.getElementById("examToolbar").classList.remove("hidden");
             switchTab("result");
 
             // Tự động lưu vào lịch sử (background)
@@ -1101,6 +1089,9 @@
       }
 
       function deleteHistoryItem(id) {
+        const item = loadHistory().find(h => h.id === id);
+        const name = item ? item.title : "này";
+        if (!confirm(`Bạn có chắc muốn xóa đề "${name}" này không?`)) return;
         saveHistory(loadHistory().filter(h => h.id !== id));
         renderHistory();
       }
