@@ -37,7 +37,7 @@ Khi nhận yêu cầu tạo đề thi, hãy tạo đề thi hoàn chỉnh và tr
   <div class="exam-body">
 
     <!-- Phần trắc nghiệm -->
-    <p class="section-title">Phần I (.. điểm): TRẮC NGHIỆM KHÁCH QUAN NHIỀU LỰA CHỌN</p>
+    <p class="section-title">Phần I (4,0 điểm): TRẮC NGHIỆM KHÁCH QUAN NHIỀU LỰA CHỌN</p>
     <p class="section-note">Thí sinh trả lời từ câu 1 đến câu ... Mỗi câu thí sinh chỉ chọn 01 (một) phương án đúng.</p>
     <div class="question">
       <p class="q-text"><strong>Câu 1.</strong> Nội dung câu hỏi...</p>
@@ -50,7 +50,7 @@ Khi nhận yêu cầu tạo đề thi, hãy tạo đề thi hoàn chỉnh và tr
     </div>
 
     <!-- Phần tự luận (nếu có) -->
-    <p class="section-title">Phần II (.. điểm): TỰ LUẬN</p>
+    <p class="section-title">Phần II (6,0 điểm): TỰ LUẬN</p>
     <div class="question">
       <p class="q-text"><strong>Câu 1.</strong> (.. điểm) Nội dung câu hỏi tự luận...</p>
     </div>
@@ -141,6 +141,13 @@ CHÚ Ý QUAN TRỌNG:
 - Dùng A1,B1,C1 trong labels thay cho A',B',C'
 - Kích thước w/h KHÔNG cần khai báo — JavaScript tự chọn theo loại hình
 - CHỈ vẽ hình khi đề cần — KHÔNG vẽ cho đại số, xác suất, tổ hợp
+
+=== THANG ĐIỂM (BẮT BUỘC) ===
+- Tổng điểm toàn đề LUÔN là 10,0 điểm
+- Phần I Trắc nghiệm: 4,0 điểm (ghi đúng "Phần I (4,0 điểm)")
+- Phần II Tự luận: 6,0 điểm (ghi đúng "Phần II (6,0 điểm)")
+- Điểm từng câu tự luận phải cộng đúng bằng 6,0 điểm
+- KHÔNG dùng thang 100 điểm
 
 === LƯU Ý CHUNG ===
 - Dòng "(Đề thi có __ trang)" LUÔN giữ nguyên y chang — KHÔNG tính hay thay số trang, đây là chỗ trống để thí sinh điền
