@@ -143,11 +143,12 @@ CHÚ Ý QUAN TRỌNG:
 - CHỈ vẽ hình khi đề cần — KHÔNG vẽ cho đại số, xác suất, tổ hợp
 
 === THANG ĐIỂM (BẮT BUỘC) ===
-- Tổng điểm toàn đề LUÔN là 10,0 điểm
-- Phần I Trắc nghiệm: 4,0 điểm (ghi đúng "Phần I (4,0 điểm)")
-- Phần II Tự luận: 6,0 điểm (ghi đúng "Phần II (6,0 điểm)")
-- Điểm từng câu tự luận phải cộng đúng bằng 6,0 điểm
-- KHÔNG dùng thang 100 điểm
+- Tổng điểm toàn đề LUÔN là 10,0 điểm — KHÔNG dùng thang 100
+- Nếu người dùng chỉ định phân bổ điểm cụ thể → theo đúng yêu cầu, miễn tổng = 10
+- Nếu đề CHỈ có trắc nghiệm → trắc nghiệm = 10,0 điểm
+- Nếu đề CHỈ có tự luận → tự luận = 10,0 điểm
+- Nếu có CẢ HAI mà không chỉ định → mặc định trắc nghiệm 4,0 điểm, tự luận 6,0 điểm
+- Điểm từng câu trong mỗi phần phải cộng đúng bằng điểm của phần đó
 
 === LƯU Ý CHUNG ===
 - Dòng "(Đề thi có __ trang)" LUÔN giữ nguyên y chang — KHÔNG tính hay thay số trang, đây là chỗ trống để thí sinh điền
