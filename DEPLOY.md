@@ -83,8 +83,8 @@ Thêm 3 biến sau cho môi trường **Production**:
 
 | Key              | Value                              |
 |------------------|------------------------------------|
-| `ZALO_APP_ID`    | `3321804211495068656`              |
-| `ZALO_APP_SECRET`| `KA5nsDMnYx3N9Lm38SBQ`            |
+| `ZALO_APP_ID`    | App ID từ Zalo Developers          |
+| `ZALO_APP_SECRET`| App Secret từ Zalo Developers      |
 | `BASE_URL`       | `https://examrender.pages.dev`     |
 
 > Nếu bạn dùng custom domain, thay `BASE_URL` bằng domain thực tế của bạn.
@@ -146,8 +146,8 @@ wrangler pages deploy . --project-name=examrender
 - Biến môi trường nhạy cảm như `ZALO_APP_SECRET` chỉ đặt trong Cloudflare Dashboard
 - Tạo file `.dev.vars` (Cloudflare sẽ tự tìm khi chạy local) để test cục bộ:
 
-```
-ZALO_APP_ID=3321804211495068656
-ZALO_APP_SECRET=KA5nsDMnYx3N9Lm38SBQ
+```env
+ZALO_APP_ID=your_zalo_app_id
+ZALO_APP_SECRET=your_zalo_app_secret
 BASE_URL=http://localhost:8788
 ```
