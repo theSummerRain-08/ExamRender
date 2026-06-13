@@ -70,6 +70,9 @@
       .typing-dot:nth-child(3) { animation-delay: 0.3s; }
       @keyframes typingBounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-5px)} }
 
+      /* ── Nav scroller — ẩn scrollbar ── */
+      #navScroller::-webkit-scrollbar { display: none; }
+
       /* ── Print styles ── */
       @media print {
         header, nav { display: none !important; }
@@ -256,50 +259,300 @@
 
       </div>
 
+      <!-- ── TAB 5: NHẬP ĐÁP ÁN ──────────────────────────────────────────── -->
+      <div id="tabAnswerkey" class="flex-1 flex flex-col overflow-hidden hidden">
+
+        <!-- Header: nhập số câu -->
+        <div class="bg-white border-b px-4 py-2.5 flex-shrink-0 flex items-center gap-3">
+
+          <!-- Trạng thái xem -->
+          <div id="akTotalDisplay" class="flex items-center gap-2.5">
+            <span class="text-sm" style="color:#7a7a7a">Số câu:</span>
+            <span id="akTotalNum" class="text-base font-bold" style="color:#1d1d1f">40</span>
+            <button onclick="editAkTotal()"
+              class="w-8 h-8 rounded-xl flex items-center justify-center transition active:scale-90"
+              style="background:#f0f5ff;color:#0066cc">
+              <i class="fa-solid fa-pencil text-xs"></i>
+            </button>
+          </div>
+
+          <!-- Trạng thái chỉnh sửa (ẩn mặc định) -->
+          <div id="akTotalEdit" class="hidden items-center gap-2">
+            <span class="text-sm" style="color:#7a7a7a">Số câu:</span>
+            <input id="akTotalInput" type="number" min="1" max="60" value="40"
+              class="w-14 rounded-xl border-2 text-sm font-bold text-center py-1"
+              style="border-color:#0066cc;color:#1d1d1f;outline:none"
+              onkeydown="if(event.key==='Enter')confirmAkTotalChange()">
+            <button onclick="confirmAkTotalChange()"
+              class="px-4 py-1.5 rounded-xl text-white text-sm font-semibold transition active:scale-95"
+              style="background:#0066cc">OK</button>
+            <button onclick="cancelAkTotalEdit()"
+              class="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 transition active:scale-90"
+              style="background:#f5f5f7">
+              <i class="fa-solid fa-xmark text-xs"></i>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Danh sách các dòng -->
+        <div id="akList" class="flex-1 overflow-y-auto px-4 py-2"></div>
+
+        <!-- Nút chấm thi -->
+        <div class="bg-white border-t px-4 py-3 pb-safe flex-shrink-0 shadow-[0_-2px_8px_rgba(0,0,0,0.06)]">
+          <button id="akSubmitBtn" disabled onclick="showAkConfirm()"
+            class="w-full py-4 rounded-full text-white font-semibold text-sm flex items-center justify-center gap-2 transition active:scale-95 disabled:opacity-40"
+            style="background:#0066cc;letter-spacing:-0.374px">
+            Chấm thi
+          </button>
+          <p id="akProgress" class="text-center text-xs text-slate-400 mt-2">Chưa nhập đáp án</p>
+        </div>
+
+      </div>
+
+      <!-- ── TAB: CHẤM THI ────────────────────────────────────────────────── -->
+      <div id="tabGrade" class="flex-1 flex flex-col overflow-hidden hidden">
+
+        <!-- Trạng thái trống: chưa chụp -->
+        <div id="gradeEmpty" class="flex-1 flex flex-col items-center justify-center gap-5 px-8">
+          <div class="w-24 h-24 rounded-[28px] flex items-center justify-center" style="background:#f0f5ff">
+            <i class="fa-solid fa-camera text-4xl" style="color:#0066cc"></i>
+          </div>
+          <div class="text-center">
+            <p class="text-sm font-semibold mb-1" style="color:#1d1d1f">Chụp bài làm học sinh</p>
+            <p class="text-xs leading-relaxed" style="color:#7a7a7a">AI sẽ tự động nhận diện đáp án<br/>học sinh đã tô khoanh</p>
+          </div>
+          <label class="px-8 py-3.5 rounded-full text-white font-semibold text-sm cursor-pointer active:scale-95 transition inline-flex items-center gap-2" style="background:#0066cc">
+            <i class="fa-solid fa-camera"></i> Chụp bài làm
+            <input type="file" accept="image/*" capture="environment" class="hidden" onchange="handleGradeImage(this)">
+          </label>
+        </div>
+
+        <!-- Trạng thái đang nhận diện -->
+        <div id="gradeLoading" class="hidden flex-1 flex flex-col items-center justify-center gap-4">
+          <svg class="animate-spin w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" stroke="#e0e0e0" stroke-width="3"/>
+            <path d="M12 2a10 10 0 0 1 10 10" stroke="#0066cc" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+          <p class="text-sm" style="color:#7a7a7a">AI đang nhận diện bài làm...</p>
+        </div>
+
+        <!-- Trạng thái có kết quả: chỉnh + xác nhận -->
+        <div id="gradeResult" class="hidden flex-1 flex flex-col overflow-hidden">
+          <!-- Tên học sinh + nút chụp lại -->
+          <div class="bg-white border-b px-4 py-2.5 flex-shrink-0 flex items-center gap-2">
+            <input id="gradeStudentName" type="text" placeholder="Tên học sinh..."
+              class="flex-1 rounded-xl border px-3 py-2 text-sm"
+              style="border-color:#e0e0e0;color:#1d1d1f;outline:none">
+            <label class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 cursor-pointer active:scale-90 transition"
+              style="background:#f0f5ff;color:#0066cc" title="Chụp lại">
+              <i class="fa-solid fa-rotate-right text-sm"></i>
+              <input type="file" accept="image/*" capture="environment" class="hidden" onchange="handleGradeImage(this)">
+            </label>
+          </div>
+          <!-- Danh sách đáp án nhận diện (có thể chỉnh) -->
+          <div id="gradeAnswerList" class="flex-1 overflow-y-auto px-4 py-2"></div>
+          <!-- Nút xác nhận chấm -->
+          <div class="bg-white border-t px-4 py-3 pb-safe flex-shrink-0 shadow-[0_-2px_8px_rgba(0,0,0,0.06)]">
+            <button onclick="submitGrade()"
+              class="w-full py-4 rounded-full text-white font-semibold text-sm transition active:scale-95"
+              style="background:#0066cc;letter-spacing:-0.374px">
+              Xác nhận chấm điểm
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── TAB: THỐNG KÊ ─────────────────────────────────────────────────── -->
+      <div id="tabStats" class="flex-1 flex flex-col overflow-hidden hidden">
+        <!-- Header (ẩn khi chưa có data) -->
+        <div id="statsHeader" class="hidden bg-white border-b px-4 py-3 flex-shrink-0 flex items-center justify-between">
+          <p class="text-sm font-semibold" style="color:#1d1d1f">Kết quả chấm thi</p>
+          <button onclick="clearAllGradeResults()"
+            class="text-xs px-3 py-1.5 rounded-xl border transition active:scale-95"
+            style="border-color:#e0e0e0;color:#7a7a7a">Xóa tất cả</button>
+        </div>
+        <!-- Trống -->
+        <div id="statsEmpty" class="flex-1 flex items-center justify-center">
+          <div class="text-center">
+            <div class="text-5xl mb-4" style="color:#e0e0e0"><i class="fa-regular fa-chart-bar"></i></div>
+            <p class="text-sm font-semibold" style="color:#7a7a7a">Thống kê</p>
+            <p class="text-xs mt-1" style="color:#b0b0b0">Chưa có dữ liệu</p>
+          </div>
+        </div>
+        <!-- Danh sách học sinh -->
+        <div id="statsList" class="hidden flex-1 overflow-y-auto px-4 py-3 space-y-2"></div>
+      </div>
+
     </main>
 
+    <!-- ══ MODAL XÁC NHẬN ĐÁP ÁN ════════════════════════════════════════════ -->
+    <div id="akModal" class="hidden fixed inset-0 z-50 flex items-end justify-center" style="background:rgba(0,0,0,0.45)">
+      <div class="bg-white rounded-t-3xl w-full px-6 pt-6 pb-safe" style="padding-bottom:calc(env(safe-area-inset-bottom) + 24px)">
+        <div class="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5"></div>
+        <p class="text-center text-base font-semibold mb-1" style="color:#1d1d1f">Xác nhận đáp án</p>
+        <p class="text-center text-sm mb-6" style="color:#7a7a7a">Thầy/cô đã xác nhận đáp án đúng phải không ạ?</p>
+        <div class="flex gap-3">
+          <button onclick="hideAkConfirm()"
+            class="flex-1 py-3.5 rounded-2xl text-sm font-semibold border transition active:scale-95"
+            style="border-color:#e0e0e0;color:#1d1d1f">Hủy</button>
+          <button onclick="confirmAnswerKey()"
+            class="flex-1 py-3.5 rounded-2xl text-white text-sm font-semibold transition active:scale-95"
+            style="background:#0066cc">Xác nhận</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MODAL XÁC NHẬN SỐ CÂU ═══════════════════════════════════════════ -->
+    <div id="akTotalModal" class="hidden fixed inset-0 z-50 flex items-end justify-center" style="background:rgba(0,0,0,0.45)">
+      <div class="bg-white rounded-t-3xl w-full px-6 pt-6 pb-safe" style="padding-bottom:calc(env(safe-area-inset-bottom) + 24px)">
+        <div class="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5"></div>
+        <p class="text-center text-base font-semibold mb-1" style="color:#1d1d1f">Xác nhận số câu</p>
+        <p id="akTotalConfirmText" class="text-center text-sm mb-6" style="color:#7a7a7a">Xác nhận đề có 40 câu?</p>
+        <div class="flex gap-3">
+          <button onclick="cancelAkTotalChange()"
+            class="flex-1 py-3.5 rounded-2xl text-sm font-semibold border transition active:scale-95"
+            style="border-color:#e0e0e0;color:#1d1d1f">Hủy</button>
+          <button onclick="applyAkTotal()"
+            class="flex-1 py-3.5 rounded-2xl text-white text-sm font-semibold transition active:scale-95"
+            style="background:#0066cc">Xác nhận</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MODAL: CHƯA NHẬP ĐÁP ÁN ══════════════════════════════════════════ -->
+    <div id="gradeNoKeyModal" class="hidden fixed inset-0 z-50 flex items-end justify-center" style="background:rgba(0,0,0,0.45)">
+      <div class="bg-white rounded-t-3xl w-full px-6 pt-6" style="padding-bottom:calc(env(safe-area-inset-bottom) + 24px)">
+        <div class="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5"></div>
+        <div class="text-center mb-6">
+          <div class="text-3xl mb-3" style="color:#f59e0b"><i class="fa-solid fa-triangle-exclamation"></i></div>
+          <p class="text-base font-semibold" style="color:#1d1d1f">Chưa nhập đáp án</p>
+          <p class="text-sm mt-1.5" style="color:#7a7a7a">Vui lòng nhập đáp án trước khi chấm thi</p>
+        </div>
+        <div class="flex gap-3">
+          <button onclick="document.getElementById('gradeNoKeyModal').classList.add('hidden')"
+            class="flex-1 py-3.5 rounded-2xl text-sm font-semibold border transition active:scale-95"
+            style="border-color:#e0e0e0;color:#1d1d1f">Đóng</button>
+          <button onclick="document.getElementById('gradeNoKeyModal').classList.add('hidden');switchTab('answerkey')"
+            class="flex-1 py-3.5 rounded-2xl text-white text-sm font-semibold transition active:scale-95"
+            style="background:#0066cc">Nhập đáp án</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MODAL: KẾT QUẢ CHẤM ════════════════════════════════════════════════ -->
+    <div id="gradeResultModal" class="hidden fixed inset-0 z-50 flex items-end justify-center" style="background:rgba(0,0,0,0.45)">
+      <div class="bg-white rounded-t-3xl w-full px-6 pt-6" style="padding-bottom:calc(env(safe-area-inset-bottom) + 24px)">
+        <div class="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-4"></div>
+        <div class="text-center mb-5">
+          <p class="text-xs font-semibold uppercase tracking-widest mb-3" style="color:#7a7a7a">Kết quả</p>
+          <p id="gradeResultNameEl" class="text-lg font-bold" style="color:#1d1d1f">Học sinh</p>
+          <p id="gradeResultScoreEl" class="text-5xl font-bold mt-2" style="color:#0066cc">0.0</p>
+          <p class="text-sm mt-0.5" style="color:#7a7a7a">điểm / 10</p>
+          <p id="gradeResultCorrectEl" class="text-sm mt-3 px-4 py-2 rounded-xl inline-block" style="background:#f5f5f7;color:#7a7a7a">0/0 câu đúng</p>
+        </div>
+        <button onclick="confirmGradeResult()"
+          class="w-full py-3.5 rounded-2xl text-white text-sm font-semibold transition active:scale-95"
+          style="background:#0066cc">Xác nhận & Lưu thống kê</button>
+      </div>
+    </div>
+
     <!-- ══ BOTTOM TAB BAR ══════════════════════════════════════════════════ -->
-    <nav class="nav-bar bg-white border-t flex flex-shrink-0">
+    <nav class="nav-bar bg-white border-t flex-shrink-0" style="display:flex;flex-direction:column">
 
-      <button id="btnTabCreate" onclick="switchTab('create')"
-              class="flex-1 flex flex-col items-center justify-center py-3 gap-1 border-t-2 border-[#0066cc] transition" style="color:#0066cc">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
-             stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round"
-            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-        </svg>
-        <span class="text-xs font-bold">Tạo đề</span>
-      </button>
+      <!-- Chấm chỉ trang — đặt trên nút bấm -->
+      <div class="flex justify-center gap-1 pt-1.5">
+        <div id="navDot0" class="rounded-full transition-all duration-300" style="width:16px;height:3px;background:#0066cc"></div>
+        <div id="navDot1" class="rounded-full transition-all duration-300" style="width:6px;height:3px;background:#d1d5db"></div>
+      </div>
 
-      <button id="btnTabScan" onclick="switchTab('scan')"
-              class="flex-1 flex flex-col items-center justify-center py-3 gap-1 text-slate-400 border-t-2 border-transparent transition">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
-             stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/>
-          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"/>
-        </svg>
-        <span class="text-xs font-medium">Chụp sách</span>
-      </button>
+      <!-- 2 trang nav có thể vuốt ngang -->
+      <div id="navScroller" class="flex overflow-x-auto"
+           style="scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none"
+           onscroll="onNavScroll(this)">
 
-      <button id="btnTabResult" onclick="switchTab('result')"
-              class="flex-1 flex flex-col items-center justify-center py-3 gap-1 text-slate-400 border-t-2 border-transparent transition">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
-             stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round"
-            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-        </svg>
-        <span class="text-xs font-medium">Kết quả</span>
-      </button>
+        <!-- Trang 1: Tạo đề / Chụp sách / Kết quả / Hỏi đáp -->
+        <div class="flex flex-shrink-0" style="width:100%;scroll-snap-align:start">
 
-      <button id="btnTabChat" onclick="switchTab('chat')"
-              class="flex-1 flex flex-col items-center justify-center py-3 gap-1 text-slate-400 border-t-2 border-transparent transition">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
-             stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round"
-            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-        </svg>
-        <span class="text-xs font-medium">Hỏi đáp</span>
-      </button>
+          <button id="btnTabCreate" onclick="switchTab('create')"
+                  class="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 border-b-2 border-[#0066cc] transition" style="color:#0066cc">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
+                 stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+            </svg>
+            <span class="text-xs font-bold">Tạo đề</span>
+          </button>
+
+          <button id="btnTabScan" onclick="switchTab('scan')"
+                  class="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 text-slate-400 border-t-2 border-transparent transition">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
+                 stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"/>
+            </svg>
+            <span class="text-xs font-medium">Chụp sách</span>
+          </button>
+
+          <button id="btnTabResult" onclick="switchTab('result')"
+                  class="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 text-slate-400 border-t-2 border-transparent transition">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
+                 stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <span class="text-xs font-medium">Kết quả</span>
+          </button>
+
+          <button id="btnTabChat" onclick="switchTab('chat')"
+                  class="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 text-slate-400 border-t-2 border-transparent transition">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
+                 stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+            </svg>
+            <span class="text-xs font-medium">Hỏi đáp</span>
+          </button>
+
+        </div>
+
+        <!-- Trang 2: Nhập đáp án / Chấm thi / Thống kê — mỗi nút rộng 25% -->
+        <div class="flex flex-shrink-0" style="width:100%;scroll-snap-align:start">
+
+          <button id="btnTabAnswerkey" onclick="switchTab('answerkey')"
+                  class="flex flex-col items-center justify-center py-2.5 gap-1 text-slate-400 border-b-2 border-transparent transition" style="width:25%">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
+                 stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/>
+            </svg>
+            <span class="text-xs font-medium">Nhập ĐA</span>
+          </button>
+
+          <button id="btnTabGrade" onclick="switchTab('grade')"
+                  class="flex flex-col items-center justify-center py-2.5 gap-1 text-slate-400 border-t-2 border-transparent transition" style="width:25%">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
+                 stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span class="text-xs font-medium">Chấm thi</span>
+          </button>
+
+          <button id="btnTabStats" onclick="switchTab('stats')"
+                  class="flex flex-col items-center justify-center py-2.5 gap-1 text-slate-400 border-t-2 border-transparent transition" style="width:25%">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"
+                 stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/>
+            </svg>
+            <span class="text-xs font-medium">Thống kê</span>
+          </button>
+
+        </div>
+
+      </div>
 
     </nav>
 
@@ -631,17 +884,45 @@
       });
 
       // ── Tab switching ────────────────────────────────────────────────────
+      const NAV_PAGE1 = ['create', 'scan', 'result', 'chat'];
+      const NAV_PAGE2 = ['answerkey', 'grade', 'stats'];
+
+      function updateNavDots(activePage) {
+        [0, 1].forEach(i => {
+          const dot = document.getElementById(`navDot${i}`);
+          if (!dot) return;
+          dot.style.width      = i === activePage ? '16px' : '6px';
+          dot.style.background = i === activePage ? '#0066cc' : '#d1d5db';
+        });
+      }
+
+      function onNavScroll(el) {
+        const page = Math.round(el.scrollLeft / el.offsetWidth);
+        updateNavDots(page);
+      }
+
       function switchTab(tab) {
-        const tabs = ['create', 'scan', 'result', 'chat'];
-        tabs.forEach(t => {
-          document.getElementById(`tab${t.charAt(0).toUpperCase()+t.slice(1)}`).classList.toggle('hidden', t !== tab);
+        const allTabs = [...NAV_PAGE1, ...NAV_PAGE2];
+        allTabs.forEach(t => {
+          const panel = document.getElementById(`tab${t.charAt(0).toUpperCase()+t.slice(1)}`);
+          if (panel) panel.classList.toggle('hidden', t !== tab);
           const btn = document.getElementById(`btnTab${t.charAt(0).toUpperCase()+t.slice(1)}`);
           if (!btn) return;
           const active = t === tab;
-          btn.className = `flex-1 flex flex-col items-center justify-center py-3 gap-1 border-t-2 transition`;
+          const isPage2Btn = NAV_PAGE2.includes(t);
+          btn.className = `${isPage2Btn ? '' : 'flex-1 '}flex flex-col items-center justify-center py-2.5 gap-1 border-b-2 transition`;
+          if (isPage2Btn) btn.style.width = '25%';
           btn.style.color       = active ? '#0066cc' : '#7a7a7a';
           btn.style.borderColor = active ? '#0066cc' : 'transparent';
         });
+
+        // Cuộn nav đến trang phù hợp
+        const scroller = document.getElementById('navScroller');
+        if (scroller) {
+          const isPage2 = NAV_PAGE2.includes(tab);
+          scroller.scrollTo({ left: isPage2 ? scroller.offsetWidth : 0, behavior: 'smooth' });
+          updateNavDots(isPage2 ? 1 : 0);
+        }
       }
 
       // ── Gửi tin nhắn ────────────────────────────────────────────────────
@@ -802,7 +1083,7 @@
             // Hiển thị đề thi trong tab Kết quả
             pdfPreview.innerHTML = data.html;
             renderMath(pdfPreview);
-            renderGeoGebraFigures(pdfPreview); // async — không cần await
+            renderGeoGebraFigures(pdfPreview);
 
             // Tự động chuyển tab
             switchTab("result");
@@ -1177,6 +1458,317 @@
             </div>`;
         }).join("");
       }
+
+      // ── CHẤM THI ────────────────────────────────────────────────────────
+      let gradeStudentAnswers = [];
+      let pendingGradeResult  = null;
+
+      function showGradeState(state) {
+        document.getElementById('gradeEmpty').classList.toggle('hidden', state !== 'empty');
+        document.getElementById('gradeLoading').classList.toggle('hidden', state !== 'loading');
+        document.getElementById('gradeResult').classList.toggle('hidden', state !== 'result');
+      }
+
+      async function handleGradeImage(input) {
+        const file = input.files[0];
+        if (!file) return;
+        input.value = '';
+        showGradeState('loading');
+
+        try {
+          const base64 = await new Promise((res, rej) => {
+            const reader = new FileReader();
+            reader.onload  = () => res(reader.result);
+            reader.onerror = rej;
+            reader.readAsDataURL(file);
+          });
+
+          const apiRes = await fetch('/api/grade', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imageBase64: base64, numQuestions: akTotal })
+          });
+          const data = await apiRes.json();
+          if (!apiRes.ok || data.error) throw new Error(data.error || 'Lỗi AI');
+
+          gradeStudentAnswers = Array.from({ length: akTotal }, (_, i) =>
+            ['A','B','C','D'].includes(data.answers?.[i]) ? data.answers[i] : null
+          );
+          renderGradeAnswers();
+          showGradeState('result');
+        } catch (err) {
+          showGradeState('empty');
+          alert('Lỗi nhận diện: ' + err.message);
+        }
+      }
+
+      function renderGradeAnswers() {
+        const list = document.getElementById('gradeAnswerList');
+        list.innerHTML = '';
+        for (let i = 0; i < akTotal; i++) {
+          const ans = gradeStudentAnswers[i];
+          const row = document.createElement('div');
+          row.className = 'flex items-center gap-3 py-2.5 border-b border-[#f5f5f7]';
+          row.innerHTML = `
+            <span class="w-6 text-right text-sm font-semibold flex-shrink-0" style="color:#7a7a7a">${i + 1}</span>
+            <div class="flex gap-2">
+              ${['A','B','C','D'].map(opt => {
+                const sel = ans === opt;
+                return `<button onclick="setGradeAnswer(${i},'${opt}')" id="gradeBtn${i}${opt}"
+                  class="w-11 h-11 rounded-full text-sm font-semibold border-2 flex items-center justify-center transition active:scale-90"
+                  style="border-color:${sel?'#0066cc':'#e0e0e0'};color:${sel?'white':'#7a7a7a'};background:${sel?'#0066cc':'white'}">${opt}</button>`;
+              }).join('')}
+            </div>`;
+          list.appendChild(row);
+        }
+      }
+
+      function setGradeAnswer(rowIdx, answer) {
+        gradeStudentAnswers[rowIdx] = answer;
+        ['A','B','C','D'].forEach(opt => {
+          const btn = document.getElementById(`gradeBtn${rowIdx}${opt}`);
+          if (!btn) return;
+          const sel = opt === answer;
+          btn.style.background  = sel ? '#0066cc' : 'white';
+          btn.style.borderColor = sel ? '#0066cc' : '#e0e0e0';
+          btn.style.color       = sel ? 'white'   : '#7a7a7a';
+        });
+      }
+
+      function submitGrade() {
+        const keyFilled = akAnswers.slice(0, akTotal).filter(a => a !== null).length;
+        if (keyFilled < akTotal) {
+          document.getElementById('gradeNoKeyModal').classList.remove('hidden');
+          return;
+        }
+        const name = document.getElementById('gradeStudentName').value.trim() || 'Học sinh';
+        let correct = 0;
+        for (let i = 0; i < akTotal; i++) {
+          if (gradeStudentAnswers[i] === akAnswers[i]) correct++;
+        }
+        const score = parseFloat((correct / akTotal * 10).toFixed(1));
+        pendingGradeResult = { name, score, correct, total: akTotal,
+          date: new Date().toLocaleDateString('vi-VN') };
+
+        document.getElementById('gradeResultNameEl').textContent    = name;
+        document.getElementById('gradeResultScoreEl').textContent   = score.toFixed(1);
+        document.getElementById('gradeResultCorrectEl').textContent = `${correct}/${akTotal} câu đúng`;
+        document.getElementById('gradeResultModal').classList.remove('hidden');
+      }
+
+      function confirmGradeResult() {
+        document.getElementById('gradeResultModal').classList.add('hidden');
+        if (pendingGradeResult) {
+          const list = loadGradeResults();
+          list.unshift(pendingGradeResult);
+          saveGradeResults(list);
+          pendingGradeResult = null;
+          renderStats();
+        }
+        // Reset để chấm học sinh tiếp theo
+        document.getElementById('gradeStudentName').value = '';
+        gradeStudentAnswers = [];
+        showGradeState('empty');
+      }
+
+      // ── THỐNG KÊ ────────────────────────────────────────────────────────
+      function loadGradeResults() {
+        try { return JSON.parse(localStorage.getItem('gradeResults') || '[]'); }
+        catch { return []; }
+      }
+      function saveGradeResults(data) {
+        localStorage.setItem('gradeResults', JSON.stringify(data));
+      }
+
+      function clearAllGradeResults() {
+        if (!confirm('Xóa toàn bộ dữ liệu chấm thi?')) return;
+        saveGradeResults([]);
+        renderStats();
+      }
+
+      function deleteGradeResult(idx) {
+        const list = loadGradeResults();
+        list.splice(idx, 1);
+        saveGradeResults(list);
+        renderStats();
+      }
+
+      function renderStats() {
+        const results = loadGradeResults();
+        const empty   = document.getElementById('statsEmpty');
+        const list    = document.getElementById('statsList');
+        const header  = document.getElementById('statsHeader');
+
+        if (!results.length) {
+          empty.classList.remove('hidden');
+          list.classList.add('hidden');
+          header.classList.add('hidden');
+          return;
+        }
+        empty.classList.add('hidden');
+        list.classList.remove('hidden');
+        header.classList.remove('hidden');
+
+        const avg = (results.reduce((s, r) => s + r.score, 0) / results.length).toFixed(1);
+        list.innerHTML = `
+          <div class="bg-white rounded-2xl border border-[#e0e0e0] px-4 py-3 mb-1">
+            <div class="flex justify-between text-sm mb-1">
+              <span style="color:#7a7a7a">Số học sinh</span>
+              <span class="font-bold" style="color:#1d1d1f">${results.length}</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span style="color:#7a7a7a">Điểm trung bình</span>
+              <span class="font-bold" style="color:#0066cc">${avg}</span>
+            </div>
+          </div>
+          ${results.map((r, idx) => `
+            <div class="bg-white rounded-2xl border border-[#e0e0e0] px-4 py-3 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-sm font-bold text-white"
+                style="background:${r.score >= 8 ? '#22c55e' : r.score >= 5 ? '#0066cc' : '#ef4444'}">
+                ${r.score.toFixed(1)}
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold truncate" style="color:#1d1d1f">${r.name}</p>
+                <p class="text-xs" style="color:#7a7a7a">${r.correct}/${r.total} câu đúng · ${r.date || ''}</p>
+              </div>
+              <button onclick="deleteGradeResult(${idx})"
+                class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 text-red-400 transition active:scale-90"
+                style="background:#fef2f2">
+                <i class="fa-solid fa-trash-can text-xs"></i>
+              </button>
+            </div>`).join('')}`;
+      }
+
+      // Khởi tạo stats
+      renderStats();
+
+      // ── NHẬP ĐÁP ÁN ─────────────────────────────────────────────────────
+      const AK_MAX   = 60;
+      let   akTotal  = 40;        // số câu hiện tại (có thể thay đổi)
+      let   akPending = 40;       // số câu đang chờ xác nhận
+      const akAnswers = new Array(AK_MAX).fill(null);
+      let   akUnlocked = 0;       // chỉ số dòng đang mở (0-based)
+
+      // ── Render danh sách dòng ───────────────────────────────────────────
+      function initAnswerKeyRows() {
+        const list = document.getElementById('akList');
+        list.innerHTML = '';
+        // Xoá đáp án ngoài phạm vi mới
+        for (let i = akTotal; i < AK_MAX; i++) akAnswers[i] = null;
+        if (akUnlocked >= akTotal) akUnlocked = akTotal - 1;
+
+        for (let i = 0; i < akTotal; i++) {
+          const isDone   = akAnswers[i] !== null;
+          const isActive = i === akUnlocked && !isDone;
+          const isLocked = i > akUnlocked && !isDone;
+          const numColor = isDone ? '#0066cc' : (isActive ? '#1d1d1f' : '#b0b0b0');
+
+          const row = document.createElement('div');
+          row.id = `akRow${i}`;
+          row.className = 'flex items-center gap-3 py-2.5 border-b border-[#f5f5f7]';
+          row.innerHTML = `
+            <span class="w-6 text-right text-sm font-semibold flex-shrink-0" style="color:${numColor}">${i + 1}</span>
+            <div class="flex gap-2">
+              ${['A','B','C','D'].map(opt => {
+                const sel = akAnswers[i] === opt;
+                return `<button id="akBtn${i}${opt}" onclick="selectAkAnswer(${i},'${opt}')"
+                  class="w-11 h-11 rounded-full text-sm font-semibold border-2 flex items-center justify-center transition active:scale-90"
+                  style="border-color:${sel ? '#0066cc' : '#e0e0e0'};color:${sel ? 'white' : (isLocked ? '#d1d5db' : '#7a7a7a')};background:${sel ? '#0066cc' : 'white'}"
+                  ${isLocked ? 'disabled' : ''}>${opt}</button>`;
+              }).join('')}
+            </div>`;
+          list.appendChild(row);
+        }
+        updateAkProgress();
+      }
+
+      function selectAkAnswer(rowIdx, answer) {
+        if (rowIdx > akUnlocked) return;
+        akAnswers[rowIdx] = answer;
+
+        // Cập nhật 4 nút dòng này
+        ['A','B','C','D'].forEach(opt => {
+          const btn = document.getElementById(`akBtn${rowIdx}${opt}`);
+          if (!btn) return;
+          const active = opt === answer;
+          btn.style.background  = active ? '#0066cc' : 'white';
+          btn.style.borderColor = active ? '#0066cc' : '#e0e0e0';
+          btn.style.color       = active ? 'white'   : '#7a7a7a';
+        });
+        const numEl = document.querySelector(`#akRow${rowIdx} span`);
+        if (numEl) numEl.style.color = '#0066cc';
+
+        // Mở khóa dòng tiếp theo
+        if (rowIdx < akTotal - 1 && rowIdx === akUnlocked) {
+          akUnlocked = rowIdx + 1;
+          ['A','B','C','D'].forEach(opt => {
+            const btn = document.getElementById(`akBtn${akUnlocked}${opt}`);
+            if (btn) { btn.removeAttribute('disabled'); btn.style.color = '#7a7a7a'; }
+          });
+          const nextNum = document.querySelector(`#akRow${akUnlocked} span`);
+          if (nextNum) nextNum.style.color = '#1d1d1f';
+          document.getElementById(`akRow${akUnlocked}`)
+            ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        updateAkProgress();
+      }
+
+      function updateAkProgress() {
+        const filled = akAnswers.slice(0, akTotal).filter(a => a !== null).length;
+        const prog = document.getElementById('akProgress');
+        if (prog) prog.textContent = filled === akTotal
+          ? `Đã nhập đủ ${akTotal} đáp án ✓`
+          : `Đã nhập ${filled}/${akTotal} đáp án`;
+        const btn = document.getElementById('akSubmitBtn');
+        if (btn) btn.disabled = filled < akTotal;
+      }
+
+      // ── Đổi số câu ──────────────────────────────────────────────────────
+      function editAkTotal() {
+        document.getElementById('akTotalInput').value = akTotal;
+        document.getElementById('akTotalDisplay').classList.add('hidden');
+        const edit = document.getElementById('akTotalEdit');
+        edit.classList.remove('hidden');
+        edit.classList.add('flex');
+        document.getElementById('akTotalInput').focus();
+      }
+
+      function cancelAkTotalEdit() {
+        document.getElementById('akTotalEdit').classList.add('hidden');
+        document.getElementById('akTotalEdit').classList.remove('flex');
+        document.getElementById('akTotalDisplay').classList.remove('hidden');
+      }
+
+      function confirmAkTotalChange() {
+        let val = parseInt(document.getElementById('akTotalInput').value);
+        if (isNaN(val) || val < 1) val = 1;
+        if (val > AK_MAX) val = AK_MAX;
+        akPending = val;
+        document.getElementById('akTotalConfirmText').textContent =
+          `Xác nhận đề có ${val} câu?`;
+        document.getElementById('akTotalModal').classList.remove('hidden');
+      }
+
+      function cancelAkTotalChange() {
+        document.getElementById('akTotalModal').classList.add('hidden');
+        cancelAkTotalEdit();
+      }
+
+      function applyAkTotal() {
+        document.getElementById('akTotalModal').classList.add('hidden');
+        cancelAkTotalEdit();
+        akTotal = akPending;
+        document.getElementById('akTotalNum').textContent = akTotal;
+        initAnswerKeyRows();
+      }
+
+      // ── Modal chấm thi ───────────────────────────────────────────────────
+      function showAkConfirm()  { document.getElementById('akModal').classList.remove('hidden'); }
+      function hideAkConfirm()  { document.getElementById('akModal').classList.add('hidden'); }
+      function confirmAnswerKey() { hideAkConfirm(); switchTab('grade'); }
+
+      // Khởi tạo khi tải trang
+      initAnswerKeyRows();
 
       // Render lịch sử khi tải trang
       renderHistory();

@@ -74,72 +74,55 @@ Trang web dùng KaTeX, PHẢI dùng LaTeX cho mọi ký hiệu toán học:
 - Vector: $\\vec{AB}$  |  Góc: $\\widehat{ABC}$  |  Phân số to: $\\dfrac{a}{b}$
 - KHÔNG dùng text thuần như "sqrt(x)" hay "1/2"
 
-=== VẼ HÌNH HÌNH HỌC — HỆ THỐNG TEMPLATE (KHI CẦN) ===
-Khi bài toán YÊU CẦU có hình vẽ, dùng thẻ data-shape đặt TRƯỚC câu hỏi liên quan.
-JavaScript sẽ tự tính tọa độ chiếu xiên góc và sinh lệnh GeoGebra — AI KHÔNG cần tính tay.
+=== VẼ HÌNH HÌNH HỌC (KHI ĐỀ BÀI CẦN HÌNH) ===
+Có 2 hệ thống vẽ hình, chọn đúng loại:
 
-CÚ PHÁP:
-<div class="ggb-figure" data-shape='{"type":"TÊN_LOẠI","tham_số_1":...,"tham_số_2":...,"cap":"Chú thích"}'></div>
+━━━ ① HÌNH PHẲNG TÙY Ý — nhúng SVG trực tiếp ━━━
+Áp dụng cho: tam giác (đường cao, phân giác, trung tuyến), đường tròn,
+tứ giác, góc, đồ thị, hình phẳng bất kỳ.
 
-CÁC LOẠI HÌNH VÀ THAM SỐ:
+Cú pháp — đặt ngay trong <li> của câu hỏi:
+<div class="fig">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 170">
+  <!-- Ví dụ: tam giác ABC với đường cao CH -->
+  <line x1="20"  y1="150" x2="190" y2="150" stroke="#000" stroke-width="1.5" fill="none"/>
+  <line x1="20"  y1="150" x2="75"  y2="20"  stroke="#000" stroke-width="1.5" fill="none"/>
+  <line x1="190" y1="150" x2="75"  y2="20"  stroke="#000" stroke-width="1.5" fill="none"/>
+  <line x1="75"  y1="20"  x2="75"  y2="150" stroke="#000" stroke-width="1.2" fill="none" stroke-dasharray="4,3"/>
+  <!-- Góc vuông tại H -->
+  <path d="M75,150 l0,-9 l9,0" stroke="#000" stroke-width="1" fill="none"/>
+  <!-- Nhãn điểm -->
+  <text x="10"  y="164" font-size="13" font-family="serif" font-style="italic">A</text>
+  <text x="193" y="164" font-size="13" font-family="serif" font-style="italic">B</text>
+  <text x="70"  y="14"  font-size="13" font-family="serif" font-style="italic">C</text>
+  <text x="78"  y="164" font-size="13" font-family="serif" font-style="italic">H</text>
+</svg>
+</div>
 
-① sphere — Hình cầu
-  {"type":"sphere","r":3,"cap":"Hinh cau tam O ban kinh R"}
-  Tham số: r (bán kính)
-  Nhãn tùy chỉnh: labels.O (mặc định "O")
+Quy tắc SVG bắt buộc:
+- TỰ TÍNH tọa độ pixel cho từng điểm, đặt hình vừa trong viewBox
+- Nét liền (cạnh thấy): stroke="#000" stroke-width="1.5" fill="none"
+- Nét đứt (đường phụ/cạnh khuất): thêm stroke-dasharray="4,3" stroke-width="1.2"
+- Nhãn điểm: font-size="13" font-family="serif" font-style="italic"
+- Góc vuông tại điểm P trên đường thẳng nằm ngang: <path d="M Px,Py l0,-9 l9,0" stroke="#000" stroke-width="1" fill="none"/>
+- Căn nhãn: điểm dưới → y+14; điểm trên → y-6; điểm trái → x-16; điểm phải → x+4
 
-② box — Hình hộp chữ nhật ABCD.A1B1C1D1
-  {"type":"box","a":4,"b":3,"c":3,"cap":"Hinh hop ABCD.A1B1C1D1"}
-  Tham số: a (chiều dài), b (chiều rộng), c (chiều cao)
-  Nhãn tùy chỉnh: labels.A, B, C, D, A1, B1, C1, D1
+━━━ ② HÌNH KHÔNG GIAN TIÊU CHUẨN — dùng data-shape JSON ━━━
+Áp dụng cho: hình chóp, hộp chữ nhật, lăng trụ, hình trụ, hình nón, hình cầu.
 
-③ pyramid — Hình chóp tứ giác đều S.ABCD
-  {"type":"pyramid","a":4,"h":5,"cap":"Hinh chop S.ABCD"}
-  Tham số: a (cạnh đáy vuông), h (chiều cao)
-  Nhãn tùy chỉnh: labels.A, B, C, D, S
+<div class="ggb-figure" data-shape='{"type":"LOẠI","...tham_số...","cap":"Chú thích"}'></div>
 
-④ prism — Lăng trụ đứng tam giác đều ABC.A1B1C1
-  {"type":"prism","a":4,"h":5,"cap":"Lang tru ABC.A1B1C1"}
-  Tham số: a (cạnh đáy tam giác đều), h (chiều cao)
-  Nhãn tùy chỉnh: labels.A, B, C, A1, B1, C1
-
-⑤ cylinder — Hình trụ
-  {"type":"cylinder","r":3,"h":5,"cap":"Hinh tru"}
-  Tham số: r (bán kính đáy), h (chiều cao)
-
-⑥ cone — Hình nón
-  {"type":"cone","r":3,"h":5,"cap":"Hinh non dinh S"}
-  Tham số: r (bán kính đáy), h (chiều cao)
-  Nhãn tùy chỉnh: labels.S (đỉnh, mặc định "S"), labels.O (tâm đáy, mặc định "O")
-
-VÍ DỤ SỬ DỤNG:
-
-─── Hình chóp S.ABCD đáy vuông cạnh 4, cao 5 ───
-<div class="ggb-figure" data-shape='{"type":"pyramid","a":4,"h":5,"cap":"Hinh chop S.ABCD"}'></div>
-
-─── Hình hộp chữ nhật ABCD.A1B1C1D1 kích thước 4×3×3 ───
-<div class="ggb-figure" data-shape='{"type":"box","a":4,"b":3,"c":3,"cap":"Hinh hop ABCD.A1B1C1D1"}'></div>
-
-─── Lăng trụ đứng tam giác đều ABC.A1B1C1 cạnh 4, cao 5 ───
-<div class="ggb-figure" data-shape='{"type":"prism","a":4,"h":5,"cap":"Lang tru ABC.A1B1C1"}'></div>
-
-─── Hình trụ bán kính 3, cao 5 ───
-<div class="ggb-figure" data-shape='{"type":"cylinder","r":3,"h":5,"cap":"Hinh tru ban kinh 3 chieu cao 5"}'></div>
-
-─── Hình nón đỉnh S, bán kính 3, cao 5 ───
-<div class="ggb-figure" data-shape='{"type":"cone","r":3,"h":5,"cap":"Hinh non dinh S"}'></div>
-
-─── Hình cầu tâm O, bán kính 4 ───
-<div class="ggb-figure" data-shape='{"type":"sphere","r":4,"cap":"Hinh cau tam O ban kinh 4"}'></div>
-
-─── Tùy chỉnh nhãn: hình chóp với đỉnh M, đáy ABCD ───
-<div class="ggb-figure" data-shape='{"type":"pyramid","a":4,"h":5,"labels":{"S":"M"},"cap":"Hinh chop M.ABCD"}'></div>
+Các loại và tham số:
+① pyramid — Hình chóp S.ABCD:   {"type":"pyramid","a":4,"h":5,"cap":"Hinh chop S.ABCD"}
+② box — Hình hộp ABCD.A1B1C1D1: {"type":"box","a":4,"b":3,"c":3,"cap":"Hinh hop"}
+③ prism — Lăng trụ ABC.A1B1C1:  {"type":"prism","a":4,"h":5,"cap":"Lang tru"}
+④ cylinder — Hình trụ:           {"type":"cylinder","r":3,"h":5,"cap":"Hinh tru"}
+⑤ cone — Hình nón:               {"type":"cone","r":3,"h":5,"cap":"Hinh non"}
+⑥ sphere — Hình cầu:             {"type":"sphere","r":4,"cap":"Hinh cau"}
+Tùy chỉnh nhãn: thêm "labels":{"S":"M"} để đổi tên đỉnh.
 
 CHÚ Ý QUAN TRỌNG:
-- "cap" TUYỆT ĐỐI KHÔNG chứa dấu nháy đơn (') — sẽ phá vỡ HTML!
-  ✓ ĐÚNG: "cap":"Hinh chop S.ABCD"   ✗ SAI: dùng A'B'C' trong cap
-- Dùng A1,B1,C1 trong labels thay cho A',B',C'
-- Kích thước w/h KHÔNG cần khai báo — JavaScript tự chọn theo loại hình
+- "cap" TUYỆT ĐỐI KHÔNG chứa dấu nháy đơn (') — dùng A1,B1 thay cho A',B'
 - CHỈ vẽ hình khi đề cần — KHÔNG vẽ cho đại số, xác suất, tổ hợp
 
 === THANG ĐIỂM (BẮT BUỘC) ===

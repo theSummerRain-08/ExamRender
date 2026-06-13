@@ -417,7 +417,7 @@
       const examBody = document.getElementById("examBody");
       examBody.innerHTML = exam.html || "";
       renderMath(examBody);
-      renderGeoGebraFigures(examBody); // async — không cần await
+      renderGeoGebraFigures(examBody);
       document.getElementById("examContent").classList.remove("hidden");
 
       // Meta
