@@ -55,7 +55,7 @@ Trả về JSON sau, KHÔNG có markdown:
     if (err.message?.includes("5016")) {
       try {
         await env.AI.run(MODEL, {
-          messages: [{ role: "user", content: "agree" }],
+          prompt: "agree",
           max_tokens: 10
         });
         const raw = await runModel(env.AI, messages);
