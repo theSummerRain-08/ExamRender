@@ -1,0 +1,22 @@
+services:
+  web:
+    build: ./web
+    ports: ["3000:3000"]
+    environment:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - RENDER_URL=http://render:8001
+      - OMR_URL=http://omr:8002
+      - MODEL_TEXT_NORMAL=${MODEL_TEXT_NORMAL:-deepseek/deepseek-v4-flash}
+      - MODEL_TEXT_HARD=${MODEL_TEXT_HARD:-deepseek/deepseek-v4-pro}
+      - MODEL_VISION=${MODEL_VISION:-google/gemini-3.1-flash-lite}
+      - MODEL_VISION_HARD=${MODEL_VISION_HARD:-google/gemini-2.5-flash}
+    depends_on: [render, omr]
+
+  render:
+    build: ./render
+    # Khong mo cong ra ngoai - chi web goi noi bo
+
+  omr:
+    build: ./omr
+
+  # Cho san xuat: them store (redis) + proxy (caddy) theo tai lieu kien truc

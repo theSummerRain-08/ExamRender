@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ThayBot — Đề thi (Cloudflare Workers AI (free))</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<style>
+  body{font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;max-width:760px;margin:24px auto;padding:0 16px;color:#111;line-height:1.7;}
+  h2{border-bottom:2px solid #111;padding-bottom:6px;}
+  h3{margin-top:1.4em;}
+  ol li{margin-bottom:.8em;}
+  div.fig{text-align:center;margin:16px 0;}
+  div.fig svg{max-width:420px;height:auto;}
+</style>
+</head>
+<body>
+<h2>ĐỀ KIỂM TRA TOÁN</h2>
+<p><em>Thời gian: 45 phút</em></p>
+<h3>Phần I. Trắc nghiệm</h3>
+<ol>
+  <li>Tìm độ dài đường cao của tam giác ABC, biết AB = 6cm, BC = 8cm, AC = 10cm.
+    <div class="fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 100">
+        <line x1="10" y1="20" x2="100" y2="20" stroke="#000" stroke-width="1.2" fill="none"/>
+        <line x1="10" y1="20" x2="10" y2="90" stroke="#000" stroke-width="1.2" fill="none"/>
+        <line x1="10" y1="90" x2="100" y2="20" stroke="#000" stroke-width="1.2" fill="none"/>
+        <rect x="10" y="20" width="6" height="6" fill="#000"/>
+        <text font-size="13" font-family="serif" font-style="italic" x="15" y="35">A</text>
+        <text font-size="13" font-family="serif" font-style="italic" x="105" y="35">B</text>
+        <text font-size="13" font-family="serif" font-style="italic" x="15" y="105">C</text>
+        <line x1="10" y1="90" x2="60" y2="20" stroke="#000" stroke-width="0.8" fill="none" stroke-dasharray="5,4"/>
+        <text font-size="13" font-family="serif" font-style="italic" x="40" y="60">6cm</text>
+        <text font-size="13" font-family="serif" font-style="italic" x="60" y="10">8cm</text>
+        <text font-size="13" font-family="serif" font-style="italic" x="5" y="55">10cm</text>
+      </svg>
+    </div>
+  </li>
+  <li>Tính thể tích của hình chóp S.ABCD, biết rằng SD = 12cm, diện tích đáy ABCD là 20cm².
+    <div class="fig">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 160">
+        <line x1="50" y1="50" x2="150" y2="50" stroke="#000" stroke-width="1.2" fill="none"/>
+        <line x1="50" y1="50" x2="50" y2="120" stroke="#000" stroke-width="1.2" fill="none"/>
+        <line x1="150" y1="50" x2="150" y2="120" stroke="#000" stroke-width="1.2" fill="none"/>
+        <line x1="50" y1="120" x2="150" y2="120" stroke="#000" stroke-width="1.2" fill="none"/>
+        <line x1="50" y1="50" x2="30" y2="30" stroke="#000" stroke-width="1.2" fill="none"/>
+        <line x1="150" y1="50" x2="170" y2="30" stroke="#000" stroke-width="1.2" fill="none"/>
+        <line x1="50" y1="120" x2="30" y2="90" stroke="#000" stroke-width="1.2" fill="none"/>
+        <line x1="150" y1="120" x2="170" y2="90" stroke="#000" stroke-width="1.2" fill="none"/>
+        <line x1="30" y1="30" x2="170" y2="30" stroke="#000" stroke-width="0.8" fill="none" stroke-dasharray="5,4"/>
+        <line x1="30" y1="30" x2="30" y2="90" stroke="#000" stroke-width="0.8" fill="none" stroke-dasharray="5,4"/>
+        <line x1="170" y1="30" x2="170" y2="90" stroke="#000" stroke-width="0.8" fill="none" stroke-dasharray="5,4"/>
+        <line x1="30" y1="90" x2="170" y2="90" stroke="#000" stroke-width="0.8" fill="none" stroke-dasharray="5,4"/>
+        <text font-size="13" font-family="serif" font-style="italic" x="20" y="40">S</text>
+        <text font-size="13" font-family="serif" font-style="italic" x="40" y="60">A</text>
+        <text font-size="13" font-family="serif" font-style="italic" x="160" y="60">B</text>
+        <text font-size="13" font-family="serif" font-style="italic" x="40" y="130">C</text>
+        <text font-size="13" font-family="serif" font-style="italic" x="160" y="130">D</text>
+        <text font-size="13" font-family="serif" font-style="italic" x="10" y="80">12cm</text>
+      </svg>
+    </div>
+  </li>
+</ol>
+<h3>ĐÁP ÁN</h3>
+<p>1. Độ dài đường cao của tam giác ABC là \( \frac{48}{10} = 4,8 \) cm.</p>
+<p>2. Thể tích của hình chóp S.ABCD là \( \frac{1}{3} \times 20 \times 12 = 80 \) cm³.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "\\(", right: "\\)", display: false},
+      {left: "\\[", right: "\\]", display: true}
+    ]
+  });
+});
+</script>
+</body>
+</html>

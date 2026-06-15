@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ThayBot — Bản thử nghiệm</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<style>
+  body{font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;max-width:820px;margin:0 auto;padding:24px;color:#111;line-height:1.6;}
+  h1{font-size:22px;border-bottom:2px solid #111;padding-bottom:8px;}
+  textarea{width:100%;min-height:80px;font:inherit;padding:10px;border:1px solid #bbb;border-radius:4px;box-sizing:border-box;}
+  select,button{font:inherit;padding:8px 14px;border-radius:4px;border:1px solid #bbb;}
+  button{background:#111;color:#fff;cursor:pointer;border:none;}
+  button:disabled{background:#999;}
+  .row{display:flex;gap:10px;margin:12px 0;align-items:center;}
+  #out{border:1px solid #ddd;border-radius:4px;padding:18px;margin-top:18px;min-height:60px;}
+  .fig{text-align:center;margin:14px 0;}
+  .fig svg{max-width:100%;height:auto;}
+  .fig-error{color:#b00;font-size:14px;}
+  .badge{font-size:12px;color:#555;}
+</style>
+</head>
+<body>
+<h1>ThayBot — Bản thử nghiệm (VPS All-in-One)</h1>
+<p class="badge" id="mode"></p>
+
+<textarea id="prompt" placeholder="Ví dụ: Tạo đề kiểm tra 45 phút lớp 11, có 1 câu hình phẳng và 1 câu hình chóp..."></textarea>
+<div class="row">
+  <label>Độ khó:
+    <select id="difficulty">
+      <option value="normal">Thường (DeepSeek V4 Flash)</option>
+      <option value="hard">Khó (DeepSeek V4 Pro)</option>
+    </select>
+  </label>
+  <button id="go">Tạo đề</button>
+</div>
+<div id="out"><em>Kết quả sẽ hiện ở đây…</em></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script>
+fetch('/api/health').then(r=>r.json()).then(d=>{
+  document.getElementById('mode').textContent = d.mock
+    ? 'Chế độ MOCK — chưa gắn API key, dùng đề mẫu để demo đường ống render.'
+    : 'Chế độ AI thật — đang gọi OpenRouter.';
+});
+
+document.getElementById('go').onclick = async () => {
+  const btn = document.getElementById('go');
+  const out = document.getElementById('out');
+  btn.disabled = true; out.innerHTML = '<em>Đang tạo đề và dựng hình…</em>';
+  try {
+    const res = await fetch('/api/generate', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        prompt: document.getElementById('prompt').value,
+        difficulty: document.getElementById('difficulty').value
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    // DOMPurify: lam sach HTML truoc khi hien thi (muc 11.2 tai lieu)
+    out.innerHTML = DOMPurify.sanitize(data.html, {ADD_TAGS:['svg','path','g','text','line','circle','rect','polygon','polyline','ellipse','defs','marker','use','tspan'], ADD_ATTR:['viewBox','d','x','y','x1','y1','x2','y2','cx','cy','r','rx','ry','points','transform','fill','stroke','stroke-width','stroke-dasharray','font-size','text-anchor','xmlns','width','height','marker-end']});
+    renderMathInElement(out, {delimiters:[{left:'\\(',right:'\\)',display:false},{left:'\\[',right:'\\]',display:true}]});
+  } catch (e) {
+    out.innerHTML = '<span class="fig-error">Lỗi: ' + e.message + '</span>';
+  } finally { btn.disabled = false; }
+};
+</script>
+</body>
+</html>
