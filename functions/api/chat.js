@@ -44,7 +44,7 @@ export async function onRequestPost(context) {
 
   // Kiểm tra đăng nhập
   const { sid, data } = await getSession(request, env.SESSIONS);
-  if (!sid || !data.user) {
+  if (!sid || !data.user || data.pending) {
     return jsonResponse({ error: "Unauthorized" }, 401);
   }
 

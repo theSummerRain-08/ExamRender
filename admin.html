@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Dashboard - ThayBot Admin</title>
+  <link rel="icon" type="image/avif" href="/Image/graident-ai.avif" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { background: #f5f5f7; }
+    .card { border-radius: 18px; border: 1px solid #e0e0e0; }
+    button { transition: transform 0.1s; }
+    button:active { transform: scale(0.97); }
+    @keyframes pulse-ring {
+      0%   { box-shadow: 0 0 0 0 rgba(245,158,11,0.4); }
+      70%  { box-shadow: 0 0 0 8px rgba(245,158,11,0); }
+      100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); }
+    }
+    .pulse-badge { animation: pulse-ring 1.5s infinite; }
+  </style>
+</head>
+<body class="min-h-screen px-4 py-8" style="padding-bottom: max(2rem, env(safe-area-inset-bottom))">
+
+  <!-- Header -->
+  <div class="max-w-lg mx-auto mb-5 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <img src="/Image/ios.png" alt="ThayBot" class="w-9 h-9 rounded-[10px] object-cover" />
+      <div>
+        <p class="text-[15px] font-semibold text-[#1d1d1f]" style="letter-spacing:-0.374px">ThayBot Admin</p>
+        <p class="text-[12px] text-[#7a7a7a]">Quản lý quyền truy cập</p>
+      </div>
+    </div>
+    <button id="logoutBtn"
+      class="flex items-center gap-1.5 text-sm text-[#ff3b30] px-4 py-2 rounded-full border border-[#ffd0ce] bg-[#fff5f5]">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/>
+      </svg>
+      Đăng xuất
+    </button>
+  </div>
+
+  <!-- ── Pending requests card ── -->
+  <div class="max-w-lg mx-auto mb-4">
+    <div id="pendingCard" class="card bg-white overflow-hidden hidden">
+      <div class="px-5 pt-4 pb-3 flex items-center justify-between" style="background:#fffbeb;border-bottom:1px solid #fde68a">
+        <div class="flex items-center gap-2">
+          <span id="pendingBadge" class="w-6 h-6 rounded-full text-white text-xs font-bold flex items-center justify-center pulse-badge" style="background:#f59e0b">0</span>
+          <p class="text-[14px] font-semibold" style="color:#92400e">Yêu cầu đang chờ duyệt</p>
+        </div>
+        <p class="text-[11px]" style="color:#b45309">Tự cập nhật mỗi 5 giây</p>
+      </div>
+      <div id="pendingList" class="divide-y divide-[#f0f0f0]"></div>
+    </div>
+
+    <!-- Không có pending -->
+    <div id="pendingEmpty" class="hidden text-center py-2">
+      <p class="text-[12px] text-[#7a7a7a]">Không có yêu cầu nào đang chờ</p>
+    </div>
+  </div>
+
+  <!-- ── Approved users card ── -->
+  <div class="max-w-lg mx-auto card bg-white overflow-hidden">
+    <div class="px-5 pt-4 pb-3 border-b border-[#f0f0f0]">
+      <p class="text-[16px] font-semibold text-[#1d1d1f]" style="letter-spacing:-0.374px">Người dùng được phép</p>
+      <p class="text-[12px] text-[#7a7a7a] mt-0.5">Chỉ những người được admin duyệt mới đăng nhập được</p>
+    </div>
+
+    <!-- Loading -->
+    <div id="loadingState" class="px-5 py-8 flex justify-center">
+      <div class="flex gap-1.5">
+        <div class="w-2 h-2 rounded-full animate-bounce" style="background:#0066cc"></div>
+        <div class="w-2 h-2 rounded-full animate-bounce [animation-delay:0.15s]" style="background:#0066cc"></div>
+        <div class="w-2 h-2 rounded-full animate-bounce [animation-delay:0.3s]" style="background:#0066cc"></div>
+      </div>
+    </div>
+
+    <!-- User list -->
+    <div id="userList" class="hidden divide-y divide-[#f0f0f0]"></div>
+
+    <!-- Empty -->
+    <div id="usersEmpty" class="hidden px-5 py-8 text-center">
+      <p class="text-[14px] text-[#7a7a7a]">Chưa có người dùng nào được duyệt</p>
+      <p class="text-[12px] text-[#aaa] mt-1">Duyệt yêu cầu ở trên để thêm vào danh sách</p>
+    </div>
+  </div>
+
+  <!-- Info -->
+  <p class="max-w-lg mx-auto text-[11px] text-[#aaa] mt-4 text-center px-2">
+    Dữ liệu lưu trên Cloudflare KV · Đồng bộ trên mọi thiết bị
+  </p>
+
+  <script>
+    // ── Render pending ────────────────────────────────────────────────────
+    function renderPending(pending) {
+      const card    = document.getElementById("pendingCard");
+      const empty   = document.getElementById("pendingEmpty");
+      const list    = document.getElementById("pendingList");
+      const badge   = document.getElementById("pendingBadge");
+
+      if (pending.length === 0) {
+        card.classList.add("hidden");
+        empty.classList.remove("hidden");
+        return;
+      }
+
+      empty.classList.add("hidden");
+      card.classList.remove("hidden");
+      badge.textContent = pending.length;
+
+      list.innerHTML = pending.map(p => {
+        const time = new Date(p.requestedAt).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+        const date = new Date(p.requestedAt).toLocaleDateString("vi-VN");
+        return `
+          <div class="flex items-center gap-3 px-5 py-3.5">
+            ${p.picture
+              ? `<img src="${p.picture}" class="w-10 h-10 rounded-full object-cover flex-shrink-0" />`
+              : `<div class="w-10 h-10 rounded-full bg-[#f0f0f0] flex items-center justify-center flex-shrink-0 text-[#7a7a7a] text-sm font-semibold">${p.name?.[0] || "?"}</div>`
+            }
+            <div class="flex-1 min-w-0">
+              <p class="text-[14px] font-medium text-[#1d1d1f] truncate">${escHtml(p.name)}</p>
+              <p class="text-[11px] text-[#7a7a7a]">ID: ${escHtml(p.userId)} · ${time} ${date}</p>
+            </div>
+            <div class="flex gap-2 flex-shrink-0">
+              <button onclick="handlePending('approve','${p.userId}')"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold text-white"
+                style="background:#34c759">
+                Duyệt
+              </button>
+              <button onclick="handlePending('deny','${p.userId}')"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold text-white"
+                style="background:#ff3b30">
+                Từ chối
+              </button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // ── Render approved users ─────────────────────────────────────────────
+    function renderUsers(users) {
+      const loader = document.getElementById("loadingState");
+      const list   = document.getElementById("userList");
+      const empty  = document.getElementById("usersEmpty");
+
+      loader.classList.add("hidden");
+
+      if (users.length === 0) {
+        list.classList.add("hidden");
+        empty.classList.remove("hidden");
+        return;
+      }
+
+      empty.classList.add("hidden");
+      list.classList.remove("hidden");
+
+      list.innerHTML = users.map((u, i) => {
+        const date = u.approvedAt
+          ? new Date(u.approvedAt).toLocaleDateString("vi-VN")
+          : "";
+        return `
+          <div class="flex items-center gap-3 px-5 py-3.5">
+            ${u.picture
+              ? `<img src="${u.picture}" class="w-10 h-10 rounded-full object-cover flex-shrink-0" />`
+              : `<div class="w-10 h-10 rounded-full bg-[#e8f0fe] flex items-center justify-center flex-shrink-0 text-[#0066cc] text-sm font-semibold">${u.name?.[0] || "?"}</div>`
+            }
+            <div class="flex-1 min-w-0">
+              <p class="text-[14px] font-medium text-[#1d1d1f] truncate">${escHtml(u.name)}</p>
+              <p class="text-[11px] text-[#7a7a7a]">ID: ${escHtml(u.id)}${date ? " · " + date : ""}</p>
+            </div>
+            <button onclick="deleteUser('${u.id}')"
+              class="w-8 h-8 rounded-full bg-[#fff5f5] flex items-center justify-center flex-shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#ff3b30" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // ── Escape HTML ───────────────────────────────────────────────────────
+    function escHtml(str) {
+      return (str || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+
+    // ── Load dữ liệu ──────────────────────────────────────────────────────
+    async function loadAll() {
+      try {
+        const [pendingRes, usersRes] = await Promise.all([
+          fetch("/api/admin/pending"),
+          fetch("/api/admin/users"),
+        ]);
+
+        if (pendingRes.status === 401 || usersRes.status === 401) {
+          window.location.href = "/login.html";
+          return;
+        }
+
+        const [pendingData, usersData] = await Promise.all([
+          pendingRes.json(),
+          usersRes.json(),
+        ]);
+
+        renderPending(pendingData.pending || []);
+        renderUsers(usersData.users || []);
+      } catch (e) {
+        document.getElementById("loadingState").innerHTML =
+          `<p class="text-sm text-red-500">Lỗi tải dữ liệu: ${e.message}</p>`;
+      }
+    }
+
+    // ── Approve / Deny ────────────────────────────────────────────────────
+    async function handlePending(action, userId) {
+      const label = action === "approve" ? "Duyệt" : "Từ chối";
+      try {
+        const res  = await fetch("/api/admin/pending", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ action, userId }),
+        });
+        const data = await res.json();
+        if (!res.ok) { alert(data.error || "Có lỗi xảy ra"); return; }
+        loadAll(); // Reload cả 2 section
+      } catch (e) {
+        alert("Lỗi kết nối: " + e.message);
+      }
+    }
+
+    // ── Xoá người dùng khỏi whitelist ────────────────────────────────────
+    async function deleteUser(userId) {
+      if (!confirm("Xoá người dùng này khỏi danh sách được phép?")) return;
+      try {
+        const res  = await fetch("/api/admin/users", {
+          method:  "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ userId }),
+        });
+        const data = await res.json();
+        if (res.ok) renderUsers(data.users);
+        else alert(data.error || "Có lỗi xảy ra");
+      } catch (e) {
+        alert("Lỗi kết nối: " + e.message);
+      }
+    }
+
+    // ── Đăng xuất ─────────────────────────────────────────────────────────
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      await fetch("/api/logout", { method: "POST" }).catch(() => {});
+      window.location.href = "/login.html";
+    });
+
+    // ── Khởi chạy + polling 5 giây ────────────────────────────────────────
+    loadAll();
+    setInterval(loadAll, 5000);
+  </script>
+</body>
+</html>

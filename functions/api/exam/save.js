@@ -9,7 +9,7 @@ import { getSession, jsonResponse } from "../_shared.js";
 
 export async function onRequestPost({ request, env }) {
   const { sid, data } = await getSession(request, env.SESSIONS);
-  if (!sid || !data.user) {
+  if (!sid || !data.user || data.pending) {
     return jsonResponse({ error: "Unauthorized" }, 401);
   }
 

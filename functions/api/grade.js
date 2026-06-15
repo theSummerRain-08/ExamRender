@@ -11,7 +11,7 @@ const MODEL = "@cf/meta/llama-3.2-11b-vision-instruct";
 
 export async function onRequestPost({ request, env }) {
   const { sid, data } = await getSession(request, env.SESSIONS);
-  if (!sid || !data.user) return jsonResponse({ error: "Unauthorized" }, 401);
+  if (!sid || !data.user || data.pending) return jsonResponse({ error: "Unauthorized" }, 401);
 
   if (!env.AI) {
     return jsonResponse({ error: "Chưa cấu hình Workers AI binding." }, 500);

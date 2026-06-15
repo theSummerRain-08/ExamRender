@@ -17,8 +17,8 @@
     .btn-primary:active { background: #0071e3; }
     .btn-dark { background: #1d1d1f; color: #fff; border-radius: 9999px; font-size: 17px; font-weight: 400; letter-spacing: -0.374px; padding: 14px 22px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; }
     .btn-dark:active { background: #333; }
-    input, textarea, select { font-size: 16px; color: #1d1d1f; }
-    input:focus, textarea:focus { outline: none; box-shadow: 0 0 0 3px rgba(0,102,204,0.2); border-color: #0066cc !important; }
+    input { font-size: 16px; color: #1d1d1f; }
+    input:focus { outline: none; box-shadow: 0 0 0 3px rgba(0,102,204,0.2); border-color: #0066cc !important; }
   </style>
 </head>
 
@@ -64,16 +64,16 @@
         Đăng nhập bằng Zalo
       </button>
 
-      <button id="loginPhoneBtn" class="btn-dark">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18h3"/>
+      <button id="loginAdminBtn" class="btn-dark">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
         </svg>
-        Đăng nhập bằng SĐT
+        Đăng nhập quản trị viên
       </button>
     </div>
 
-    <!-- ── VIEW 2: Nhập số điện thoại ── -->
-    <div id="viewPhone" class="hidden">
+    <!-- ── VIEW 2: Admin login ── -->
+    <div id="viewAdmin" class="hidden">
       <button onclick="showView('choose')" class="flex items-center gap-1 text-sm text-[#0066cc] mb-5">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
@@ -81,41 +81,18 @@
         Quay lại
       </button>
 
-      <p class="text-[17px] font-semibold text-[#1d1d1f] mb-1" style="letter-spacing: -0.374px">Nhập số điện thoại</p>
-      <p class="text-sm text-[#7a7a7a] mb-4">Mã OTP sẽ được gửi qua SMS</p>
+      <p class="text-[17px] font-semibold text-[#1d1d1f] mb-1" style="letter-spacing: -0.374px">Đăng nhập quản trị</p>
+      <p class="text-sm text-[#7a7a7a] mb-5">Dành riêng cho quản trị viên</p>
 
-      <div class="flex gap-2 mb-3">
-        <span class="flex items-center px-3 rounded-xl border border-[#e0e0e0] bg-[#f5f5f7] text-sm font-semibold text-[#1d1d1f] flex-shrink-0">🇻🇳 +84</span>
-        <input id="phoneInput" type="tel" inputmode="numeric" placeholder="912 345 678"
-          class="flex-1 border border-[#e0e0e0] rounded-xl px-4 py-3 text-sm bg-white" />
+      <div class="space-y-3 mb-4">
+        <input id="adminUser" type="text" placeholder="Tên đăng nhập" autocomplete="username"
+          class="w-full border border-[#e0e0e0] rounded-xl px-4 py-3 text-sm bg-white" />
+        <input id="adminPass" type="password" placeholder="Mật khẩu" autocomplete="current-password"
+          class="w-full border border-[#e0e0e0] rounded-xl px-4 py-3 text-sm bg-white" />
       </div>
 
-      <button id="sendOtpBtn" class="btn-primary">Gửi mã OTP</button>
-      <p id="sendOtpErr" class="hidden text-xs text-red-500 mt-2 text-center"></p>
-    </div>
-
-    <!-- ── VIEW 3: Nhập mã OTP ── -->
-    <div id="viewOtp" class="hidden">
-      <button onclick="showView('phone')" class="flex items-center gap-1 text-sm text-[#0066cc] mb-5">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
-        </svg>
-        Quay lại
-      </button>
-
-      <p class="text-[17px] font-semibold text-[#1d1d1f] mb-1" style="letter-spacing: -0.374px">Nhập mã xác nhận</p>
-      <p id="otpSentTo" class="text-sm text-[#7a7a7a] mb-5">Mã 6 chữ số đã gửi đến số của bạn</p>
-
-      <input id="otpInput" type="text" inputmode="numeric" maxlength="6" placeholder="• • • • • •"
-        class="w-full border-2 border-[#e0e0e0] rounded-2xl px-4 py-4 text-center text-3xl tracking-[0.6em] font-mono mb-4 transition" />
-
-      <button id="verifyOtpBtn" class="btn-primary mb-2">Xác nhận</button>
-
-      <button id="resendOtpBtn"
-        class="w-full py-2 text-sm text-[#0066cc] disabled:opacity-40">
-        Gửi lại mã
-      </button>
-      <p id="verifyOtpErr" class="hidden text-xs text-red-500 mt-1 text-center"></p>
+      <button id="adminLoginBtn" class="btn-primary">Đăng nhập</button>
+      <p id="adminErr" class="hidden text-xs text-red-500 mt-2 text-center"></p>
     </div>
 
     <p class="text-[12px] text-[#7a7a7a] text-center mt-6 leading-relaxed">
@@ -148,18 +125,11 @@
 
     // ── Chuyển view ───────────────────────────────────────────────────────
     function showView(view) {
-      ["choose", "phone", "otp"].forEach(v => {
+      ["choose", "admin"].forEach(v => {
         const el = document.getElementById("view" + v.charAt(0).toUpperCase() + v.slice(1));
         el.classList.toggle("hidden", v !== view);
       });
-      if (view === "phone") {
-        document.getElementById("phoneInput").focus();
-        document.getElementById("sendOtpErr").classList.add("hidden");
-      }
-      if (view === "otp") {
-        document.getElementById("otpInput").focus();
-        document.getElementById("verifyOtpErr").classList.add("hidden");
-      }
+      if (view === "admin") document.getElementById("adminUser").focus();
     }
 
     // ── Đăng nhập Zalo ────────────────────────────────────────────────────
@@ -167,152 +137,56 @@
       window.location.href = "/api/auth/zalo";
     });
 
-    // ── Hiện form SĐT ────────────────────────────────────────────────────
-    document.getElementById("loginPhoneBtn").addEventListener("click", () => {
-      showView("phone");
+    // ── Hiện form Admin ───────────────────────────────────────────────────
+    document.getElementById("loginAdminBtn").addEventListener("click", () => {
+      showView("admin");
     });
 
-    // ── Gửi OTP ──────────────────────────────────────────────────────────
-    let currentPhone = "";
+    // ── Đăng nhập Admin ───────────────────────────────────────────────────
+    document.getElementById("adminLoginBtn").addEventListener("click", async () => {
+      const username = document.getElementById("adminUser").value.trim();
+      const password = document.getElementById("adminPass").value;
+      const errEl    = document.getElementById("adminErr");
+      const btn      = document.getElementById("adminLoginBtn");
 
-    async function sendOtp(phone) {
-      const res  = await fetch("/api/auth/otp/send", {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ phone }),
-      });
-      return res.json();
-    }
-
-    document.getElementById("sendOtpBtn").addEventListener("click", async () => {
-      const phone  = document.getElementById("phoneInput").value.trim();
-      const errEl  = document.getElementById("sendOtpErr");
-      const btn    = document.getElementById("sendOtpBtn");
-
-      if (!phone) {
-        errEl.textContent = "Vui lòng nhập số điện thoại";
+      if (!username || !password) {
+        errEl.textContent = "Vui lòng nhập đầy đủ thông tin";
         errEl.classList.remove("hidden");
         return;
       }
 
       btn.disabled    = true;
-      btn.textContent = "Đang gửi...";
+      btn.textContent = "Đang đăng nhập...";
       errEl.classList.add("hidden");
 
       try {
-        const data = await sendOtp(phone);
-        if (data.error) {
-          errEl.textContent = data.error;
-          errEl.classList.remove("hidden");
-        } else {
-          currentPhone = phone;
-          document.getElementById("otpSentTo").textContent =
-            `Mã 6 chữ số đã gửi đến +84 ${phone.replace(/^0/, "")}`;
-          document.getElementById("otpInput").value = "";
-          showView("otp");
-          startResendCooldown();
-        }
-      } catch (e) {
-        errEl.textContent = "Lỗi kết nối: " + e.message;
-        errEl.classList.remove("hidden");
-      } finally {
-        btn.disabled    = false;
-        btn.textContent = "Gửi mã OTP";
-      }
-    });
-
-    // Enter trong phone input
-    document.getElementById("phoneInput").addEventListener("keydown", e => {
-      if (e.key === "Enter") document.getElementById("sendOtpBtn").click();
-    });
-
-    // ── Xác nhận OTP ─────────────────────────────────────────────────────
-    document.getElementById("verifyOtpBtn").addEventListener("click", async () => {
-      const code  = document.getElementById("otpInput").value.replace(/\D/g, "");
-      const errEl = document.getElementById("verifyOtpErr");
-      const btn   = document.getElementById("verifyOtpBtn");
-
-      if (code.length !== 6) {
-        errEl.textContent = "Vui lòng nhập đủ 6 chữ số";
-        errEl.classList.remove("hidden");
-        return;
-      }
-
-      btn.disabled    = true;
-      btn.textContent = "Đang xác nhận...";
-      errEl.classList.add("hidden");
-
-      try {
-        const res  = await fetch("/api/auth/otp/verify", {
+        const res  = await fetch("/api/admin/login", {
           method:  "POST",
           headers: { "Content-Type": "application/json" },
-          body:    JSON.stringify({ phone: currentPhone, code }),
+          body:    JSON.stringify({ username, password }),
         });
         const data = await res.json();
 
-        if (data.error) {
-          errEl.textContent = data.error;
+        if (!res.ok || data.error) {
+          errEl.textContent = data.error || "Đăng nhập thất bại";
           errEl.classList.remove("hidden");
         } else {
-          window.location.href = "/index.html";
+          window.location.href = "/admin.html";
         }
       } catch (e) {
         errEl.textContent = "Lỗi kết nối: " + e.message;
         errEl.classList.remove("hidden");
       } finally {
         btn.disabled    = false;
-        btn.textContent = "Xác nhận";
+        btn.textContent = "Đăng nhập";
       }
     });
 
-    // Enter trong OTP input
-    document.getElementById("otpInput").addEventListener("keydown", e => {
-      if (e.key === "Enter") document.getElementById("verifyOtpBtn").click();
-    });
-
-    // Chỉ cho nhập số trong OTP input
-    document.getElementById("otpInput").addEventListener("input", e => {
-      e.target.value = e.target.value.replace(/\D/g, "").slice(0, 6);
-    });
-
-    // ── Gửi lại OTP + countdown 60s ──────────────────────────────────────
-    function startResendCooldown() {
-      let secs = 60;
-      const btn = document.getElementById("resendOtpBtn");
-      btn.disabled = true;
-      btn.textContent = `Gửi lại mã (${secs}s)`;
-
-      const interval = setInterval(() => {
-        secs--;
-        btn.textContent = secs > 0 ? `Gửi lại mã (${secs}s)` : "Gửi lại mã";
-        if (secs <= 0) { clearInterval(interval); btn.disabled = false; }
-      }, 1000);
-    }
-
-    document.getElementById("resendOtpBtn").addEventListener("click", async () => {
-      const errEl = document.getElementById("verifyOtpErr");
-      const btn   = document.getElementById("resendOtpBtn");
-      btn.disabled    = true;
-      btn.textContent = "Đang gửi lại...";
-      errEl.classList.add("hidden");
-
-      try {
-        const data = await sendOtp(currentPhone);
-        if (data.error) {
-          errEl.textContent = data.error;
-          errEl.classList.remove("hidden");
-          btn.disabled    = false;
-          btn.textContent = "Gửi lại mã";
-        } else {
-          document.getElementById("otpInput").value = "";
-          startResendCooldown();
-        }
-      } catch (e) {
-        errEl.textContent = "Lỗi kết nối: " + e.message;
-        errEl.classList.remove("hidden");
-        btn.disabled    = false;
-        btn.textContent = "Gửi lại mã";
-      }
+    // Enter trong admin inputs
+    ["adminUser", "adminPass"].forEach(id => {
+      document.getElementById(id).addEventListener("keydown", e => {
+        if (e.key === "Enter") document.getElementById("adminLoginBtn").click();
+      });
     });
   </script>
 </body>
