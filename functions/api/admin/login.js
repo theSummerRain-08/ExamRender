@@ -1,7 +1,8 @@
 import { randomToken, saveSession, jsonResponse } from "../_shared.js";
 
-const ADMIN_USERNAME = "ConMuaMuaHa";
-const ADMIN_PASSWORD = "12345";
+const ADMIN_USERNAME    = "ConMuaMuaHa";
+const DEFAULT_PASSWORD  = "12345";
+const PASSWORD_KEY      = "admin:password";
 const ADMIN_SESSION_TTL = 3600 * 8; // 8 giờ
 
 export async function onRequestPost({ request, env }) {
@@ -10,7 +11,14 @@ export async function onRequestPost({ request, env }) {
   catch { return jsonResponse({ error: "Invalid body" }, 400); }
 
   const { username, password } = body;
-  if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
+
+  if (username !== ADMIN_USERNAME) {
+    return jsonResponse({ error: "Sai tên đăng nhập hoặc mật khẩu" }, 401);
+  }
+
+  // Đọc mật khẩu từ KV, fallback về mặc định nếu chưa đổi
+  const stored = (await env.SESSIONS.get(PASSWORD_KEY)) ?? DEFAULT_PASSWORD;
+  if (password !== stored) {
     return jsonResponse({ error: "Sai tên đăng nhập hoặc mật khẩu" }, 401);
   }
 

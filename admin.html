@@ -31,13 +31,66 @@
         <p class="text-[12px] text-[#7a7a7a]">Quản lý quyền truy cập</p>
       </div>
     </div>
-    <button id="logoutBtn"
-      class="flex items-center gap-1.5 text-sm text-[#ff3b30] px-4 py-2 rounded-full border border-[#ffd0ce] bg-[#fff5f5]">
-      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/>
-      </svg>
-      Đăng xuất
-    </button>
+    <div class="flex items-center gap-2">
+      <button id="changePwBtn"
+        class="flex items-center gap-1.5 text-sm text-[#7a7a7a] px-4 py-2 rounded-full border border-[#e0e0e0] bg-white">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+        </svg>
+        Đổi mật khẩu
+      </button>
+      <button id="logoutBtn"
+        class="flex items-center gap-1.5 text-sm text-[#ff3b30] px-4 py-2 rounded-full border border-[#ffd0ce] bg-[#fff5f5]">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/>
+        </svg>
+        Đăng xuất
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Modal đổi mật khẩu ── -->
+  <div id="pwModal" class="hidden fixed inset-0 z-50 flex items-end justify-center" style="background:rgba(0,0,0,0.3)">
+    <div class="bg-white w-full max-w-lg rounded-t-3xl px-6 pt-5 pb-8" style="padding-bottom: max(2rem, env(safe-area-inset-bottom))">
+      <div class="flex items-center justify-between mb-5">
+        <p class="text-[17px] font-semibold text-[#1d1d1f]" style="letter-spacing:-0.374px">Đổi mật khẩu</p>
+        <button onclick="closePwModal()" class="w-8 h-8 rounded-full bg-[#f5f5f7] flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#7a7a7a" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="space-y-3 mb-4">
+        <div>
+          <label class="text-[12px] text-[#7a7a7a] mb-1 block">Mật khẩu hiện tại</label>
+          <input id="pwCurrent" type="password" placeholder="••••••"
+            class="w-full border border-[#e0e0e0] rounded-xl px-4 py-3 text-sm bg-white"
+            style="font-size:16px" />
+        </div>
+        <div>
+          <label class="text-[12px] text-[#7a7a7a] mb-1 block">Mật khẩu mới</label>
+          <input id="pwNew" type="password" placeholder="Tối thiểu 6 ký tự"
+            class="w-full border border-[#e0e0e0] rounded-xl px-4 py-3 text-sm bg-white"
+            style="font-size:16px" />
+        </div>
+        <div>
+          <label class="text-[12px] text-[#7a7a7a] mb-1 block">Xác nhận mật khẩu mới</label>
+          <input id="pwConfirm" type="password" placeholder="Nhập lại mật khẩu mới"
+            class="w-full border border-[#e0e0e0] rounded-xl px-4 py-3 text-sm bg-white"
+            style="font-size:16px" />
+        </div>
+      </div>
+
+      <p id="pwErr" class="hidden text-sm text-red-500 mb-3"></p>
+      <p id="pwOk"  class="hidden text-sm text-green-600 mb-3">Đổi mật khẩu thành công!</p>
+
+      <button id="pwSaveBtn"
+        class="w-full py-3.5 rounded-2xl text-white font-medium text-[15px]"
+        style="background:#0066cc">
+        Lưu mật khẩu mới
+      </button>
+    </div>
   </div>
 
   <!-- ── Pending requests card ── -->
@@ -249,6 +302,72 @@
     document.getElementById("logoutBtn").addEventListener("click", async () => {
       await fetch("/api/logout", { method: "POST" }).catch(() => {});
       window.location.href = "/login.html";
+    });
+
+    // ── Đổi mật khẩu ──────────────────────────────────────────────────────
+    function closePwModal() {
+      document.getElementById("pwModal").classList.add("hidden");
+      document.getElementById("pwCurrent").value = "";
+      document.getElementById("pwNew").value     = "";
+      document.getElementById("pwConfirm").value = "";
+      document.getElementById("pwErr").classList.add("hidden");
+      document.getElementById("pwOk").classList.add("hidden");
+    }
+
+    document.getElementById("changePwBtn").addEventListener("click", () => {
+      document.getElementById("pwModal").classList.remove("hidden");
+      document.getElementById("pwCurrent").focus();
+    });
+
+    document.getElementById("pwModal").addEventListener("click", e => {
+      if (e.target === document.getElementById("pwModal")) closePwModal();
+    });
+
+    document.getElementById("pwSaveBtn").addEventListener("click", async () => {
+      const current = document.getElementById("pwCurrent").value;
+      const nw      = document.getElementById("pwNew").value;
+      const confirm = document.getElementById("pwConfirm").value;
+      const errEl   = document.getElementById("pwErr");
+      const okEl    = document.getElementById("pwOk");
+      const btn     = document.getElementById("pwSaveBtn");
+
+      errEl.classList.add("hidden");
+      okEl.classList.add("hidden");
+
+      if (!current || !nw || !confirm) {
+        errEl.textContent = "Vui lòng nhập đầy đủ thông tin";
+        errEl.classList.remove("hidden"); return;
+      }
+      if (nw !== confirm) {
+        errEl.textContent = "Mật khẩu xác nhận không khớp";
+        errEl.classList.remove("hidden"); return;
+      }
+
+      btn.disabled    = true;
+      btn.textContent = "Đang lưu...";
+
+      try {
+        const res  = await fetch("/api/admin/change-password", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ currentPassword: current, newPassword: nw }),
+        });
+        const data = await res.json();
+
+        if (!res.ok || data.error) {
+          errEl.textContent = data.error || "Có lỗi xảy ra";
+          errEl.classList.remove("hidden");
+        } else {
+          okEl.classList.remove("hidden");
+          setTimeout(closePwModal, 1500);
+        }
+      } catch (e) {
+        errEl.textContent = "Lỗi kết nối: " + e.message;
+        errEl.classList.remove("hidden");
+      } finally {
+        btn.disabled    = false;
+        btn.textContent = "Lưu mật khẩu mới";
+      }
     });
 
     // ── Khởi chạy + polling 5 giây ────────────────────────────────────────

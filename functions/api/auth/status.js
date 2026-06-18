@@ -26,9 +26,16 @@ export async function onRequestGet({ request, env }) {
     const whitelist = raw ? JSON.parse(raw) : [];
 
     if (whitelist.some(u => u.id === data.user.id)) {
-      // Đã được duyệt → nâng cấp session
+      // Đã được duyệt → nâng cấp session, gia hạn cookie 24h
       await saveSession(sid, { user: data.user }, env.SESSIONS);
-      return jsonResponse({ ok: true });
+      await env.SESSIONS.put(`user_session:${data.user.id}`, sid, { expirationTtl: 86400 });
+      return new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Set-Cookie": `sid=${encodeURIComponent(sid)}; HttpOnly; SameSite=Lax; Path=/; Max-Age=86400`,
+        },
+      });
     }
 
     // Kiểm tra còn trong pending không
